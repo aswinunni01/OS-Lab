@@ -1,0 +1,8 @@
+alias number R0;
+alias square R1;
+number = 0;
+while(number <=20) do
+	square = number * number;
+	print square;
+	number = number + 1;
+endwhile;
