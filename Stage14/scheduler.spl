@@ -3,6 +3,9 @@
 alias currentPID R0;
 alias process_table_entry R1;
 
+currentPID = [SYSTEM_STATUS_TABLE +  1];
+process_table_entry = PROCESS_TABLE + 16*currentPID;
+
 multipush (BP);
 
 [process_table_entry + 12] = SP % 512;
