@@ -32,11 +32,9 @@ if(functionNum == 4) then
 	[PROCESS_TABLE + 16*currentPID + 4] = WAIT_TERMINAL;
 
 	multipush(R1, R2, R3);
-	breakpoint;
 	call MOD_5;
 	multipop(R1, R2, R3);
 	alias phyAddr R4;
-	breakpoint;
 	phyAddr = [PAGE_TABLE_BASE + currentPID*20 + 2*word/512]*512 + word%512;
 	[phyAddr] = [PROCESS_TABLE + 16*currentPID + 8];
 	return;

@@ -1,6 +1,5 @@
 // Memory manager (MOD_2)
 
-
 alias fnNumber R1; 
 
 if(fnNumber == 1) then
@@ -27,6 +26,7 @@ if(fnNumber == 1) then
 	[MEMORY_FREE_LIST + memFreeIndex] = 1;
 
 	R0 = memFreeIndex;
+	breakpoint;
 	return;
 
 endif;
@@ -48,6 +48,7 @@ if(fnNumber == 2) then
 		endif;
 	i = i + 1;
 	endwhile;
+	breakpoint;
 	return;
 endif;
 

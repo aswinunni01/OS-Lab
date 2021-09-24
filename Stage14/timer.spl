@@ -1,5 +1,4 @@
 // PID of current user process in in system_status_table 
-breakpoint;
 // Store user SP to UPTR in process table -> 13th word of the entry
 [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1])*16 + 13] = SP;
 
