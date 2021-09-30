@@ -6,7 +6,7 @@ if(functionNum == 3) then
 	while([DISK_STATUS_TABLE + 0] == 1) do
 		[PROCESS_TABLE + currentPID*16 + 4] = WAIT_DISK;
 		multipush(R1, R2);
-		call MOD_5
+		call MOD_5;
 		multipop(R1, R2);
 	endwhile;
 	[DISK_STATUS_TABLE + 0] = 1;
