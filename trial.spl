@@ -1,0 +1,8 @@
+breakpoint;
+if((R2 < 5) && (R3<12)) then
+  R1 = 2;
+endif;
+alias test R5;
+if(R2 < 16) then
+  R1 = 5;
+endif;
