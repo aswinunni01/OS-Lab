@@ -6,8 +6,11 @@ int main()
 
     begin
         pid = exposcall("Fork");
+	temp = exposcall("Wait", pid);
         pid = exposcall("Fork");
+	temp = exposcall("Wait", pid);
         pid = exposcall("Fork");
+	temp = exposcall("Wait", pid);
 
         if(pid==-1) then
             temp=exposcall("Write", -2, "Fork Error");

@@ -1,0 +1,9 @@
+
+print("MAX_MEM");
+print([SYSTEM_STATUS_TABLE + 5]);
+print("NO_DISK");
+print([SYSTEM_STATUS_TABLE + 7]);
+print("NO_SWP");
+print([SYSTEM_STATUS_TABLE + 6]);
+
+halt;
