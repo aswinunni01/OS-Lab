@@ -1,0 +1,18 @@
+decl
+  int a;
+enddecl
+
+int main(){
+decl
+  int temp, perm;
+  str fName;
+enddecl
+begin
+  temp = exposcall("Write", -2, "Enter file name");
+  temp = exposcall("Read", -1, fName);
+  temp = exposcall("Write", -2, "Enter permission");
+  temp = exposcall("Read", -1, perm);
+  temp = exposcall("Create", fName, perm);
+return 0;
+end
+}
