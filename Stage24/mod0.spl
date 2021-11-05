@@ -61,6 +61,7 @@ if(functionNum == RELEASE_INODE) then
       [procTab + 4] = READY;
       [procTab + 5] = -1;
     endif;
+  i = i + 1;
   endwhile;
   R0 = 0;
   return;
@@ -68,11 +69,14 @@ endif;
 
 
 // Acquire Buffer
-if(functioNum == ACQUIRE_BUFFER) then
+if(functionNum == ACQUIRE_BUFFER) then
   alias bufferNum R2;
   alias pid R3;
 
-  while([BUFFER_TABLE + 4*bufferNum + 2] != pid) do
+  while([BUFFER_TABLE + 4*bufferNum + 2] != -1) do
+    if([BUFFER_TABLE + 4*bufferNum + 2] == pid) then
+      break;
+    endif;
     [PROCESS_TABLE + pid*16 + 4] = WAIT_BUFFER;
     [PROCESS_TABLE + pid*16 + 5] = bufferNum;
     multipush(R1, R2, R3);
@@ -101,7 +105,7 @@ if(functionNum == RELEASE_BUFFER) then
   alias procTab R5;
   while(i<16) do
     procTab = PROCESS_TABLE + i*16;
-    if([procTab + 4] == WAIT_BUFFER && [procTab + 5] = bufferNum) then
+    if([procTab + 4] == WAIT_BUFFER && [procTab + 5] == bufferNum) then
       [procTab + 4] = READY;
       [procTab + 5] = -1;
     endif;
@@ -134,8 +138,9 @@ if(functionNum == 7) then
     [SEMAPHORE_TABLE + 4*R2] = -1;
     alias i R4;
     i=1;
+
+    alias procTab R5;
     while(i<16) do
-      alias procTab R5;
       procTab = PROCESS_TABLE + 16*i;
       if([procTab + 4] == WAIT_SEMAPHORE && [procTab + 5] == R2) then
         [procTab + 4] = READY;

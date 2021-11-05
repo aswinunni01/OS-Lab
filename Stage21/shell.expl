@@ -25,6 +25,7 @@ begin
       temp = exposcall("Exec", cmd);
       if(temp == -1) then
 	temp = exposcall("Write", -2, "BAD COMMAND");
+	temp = exposcall("Exit");
       endif;
     endif;
   endif;

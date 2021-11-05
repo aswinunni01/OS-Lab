@@ -87,19 +87,20 @@ par_resTab = ([proc_table + 11]+1) * 512 - 16;
 
 
 // Copy resource table of parent to child
-while(i<16) do
+while(i<8) do
   // Increase sem share count 
-  if([par_resTab+i] == SEMAPHORE) then
-    [SEMAPHORE_TABLE + 4*([par_resTab + i + 1]) + 1] = [SEMAPHORE_TABLE + 4*([par_resTab + i + 1]) + 1] + 1;
+  if([par_resTab+ 2*i] == SEMAPHORE) then
+    [SEMAPHORE_TABLE + 4*([par_resTab + 2*i + 1]) + 1] = [SEMAPHORE_TABLE + 4*([par_resTab + 2*i + 1]) + 1] + 1;
   else
 
     // Increase open instance share count
-    if([par_resTab + i] == FILE) then
-      [OPEN_FILE_TABLE + 4*[par_resTab + i + 1] + 1] = [OPEN_FILE_TABLE + 4*[par_resTab + i + 1] + 1] + 1;
+    if([par_resTab + 2*i] == FILE) then
+      [OPEN_FILE_TABLE + 4*[par_resTab + 2*i + 1] + 1] = [OPEN_FILE_TABLE + 4*[par_resTab + 2*i + 1] + 1] + 1;
     endif;
   endif;
 
-  [child_resTab + i]  = [par_resTab + i];
+  [child_resTab + 2*i]  = [par_resTab + 2*i];
+  [child_resTab + 2*i + 1 ]  = [par_resTab + 2*i + 1];
 i = i + 1;
 endwhile;
 

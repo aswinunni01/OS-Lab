@@ -9,10 +9,10 @@ if(fnNum == OPEN) then
   i =  0;
 
   while(i<MAX_FILE_NUM) do
-    if([INODE_TABLE + 16*i + 2] == fileName) then
+    if([INODE_TABLE + 16*i + 1] == fileName) then
       break;
     endif;
-    i = i + 1
+    i = i + 1;
   endwhile;
 
   if(i == MAX_FILE_NUM) then 
@@ -32,7 +32,7 @@ if(fnNum == OPEN) then
     return;
   endif;
 
-  if(INODE_TABLE + 16*i] == EXEC) then
+  if([INODE_TABLE + 16*i] == EXEC) then
     R0 = -1;
     return;
   endif;
@@ -42,7 +42,7 @@ if(fnNum == OPEN) then
   
   i = 0;
   while(i<MAX_OPENFILE_NUM) do
-    if(OPEN_FILE_TABLE + 4*i] == -1) then
+    if([OPEN_FILE_TABLE + 4*i] == -1) then
       break;
     endif;
     i = i + 1;
@@ -120,7 +120,7 @@ if(fnNum == BUFFERED_READ) then
 
     multipush(R1, R2, R3, R4, R5);
     R1 = DISK_STORE;
-    R4 = diskBlock
+    R4 = diskBlock;
     R2 = [SYSTEM_STATUS_TABLE + 1];
     R3 = BUFFER_BASE + bufferNum;
     call DEVICE_MANAGER;
@@ -128,10 +128,12 @@ if(fnNum == BUFFERED_READ) then
     [BUFFER_TABLE + 4*bufferNum + 1] = 0;
     endif;
 
-  multipush(R1, R2 R3, R4, R5);
+  multipush(R1, R2, R3, R4, R5);
   R1 = DISK_LOAD;
-  R3 = diskBlock;
-  R2 = BUFFER_BASE + bufferNum;
+
+  R4 = diskBlock;
+  R3 = BUFFER_BASE + bufferNum;
+  R2 = [SYSTEM_STATUS_TABLE + 1];
   call DEVICE_MANAGER;
   multipop(R1, R2, R3, R4, R5);
   [BUFFER_TABLE + 4*bufferNum] = diskBlock;
