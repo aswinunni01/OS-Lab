@@ -164,8 +164,8 @@ PTLR = 10;
 [MEMORY_FREE_LIST + 80] = 1;
 
 // Initialize per-process resource table
-i = 1;
-while(i<=8) do
+i = 0;
+while(i<`8) do
 	[([PROCESS_TABLE + 16 + 11])*512 + RESOURCE_TABLE_OFFSET +  2*i] = -1;
 	i = i + 1;
 endwhile;

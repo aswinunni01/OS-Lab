@@ -57,10 +57,10 @@ if(fnNum == OPEN) then
     [OPEN_FILE_TABLE + 4*i] = INODE_ROOT;
   else
     [OPEN_FILE_TABLE + 4*i] = inodeIndex;
-    if([FILE_STATUS_TABLE + 4*i + 1] == -1) then
-      [FILE_STATUS_TABLE + 4*i + 1] = 1;
+    if([FILE_STATUS_TABLE + 4*inodeIndex + 1] == -1) then
+      [FILE_STATUS_TABLE + 4*inodeIndex + 1] = 1;
     else
-      [FILE_STATUS_TABLE + 4*i + 1] = [FILE_STATUS_TABLE + 4*i + 1] + 1;
+      [FILE_STATUS_TABLE + 4*inodeIndex + 1] = [FILE_STATUS_TABLE + 4*inodeIndex + 1] + 1;
     endif;
   endif;
 

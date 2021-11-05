@@ -14,12 +14,14 @@ syscall = [[PTBR + 2*(userSP-5)/512]*512 + (userSP-5)%512];
 [procTab + 9] = syscall;
 [procTab + 13] = SP;
 SP = [procTab + 11]*512 -1;
+
 if(syscall == 19) then
   alias semid R5;
   alias resTab R6;
-  resTab = ([procTab+11]+1)*512 - 16;
+  resTab = ([procTab+11])*512 + RESOURCE_TABLE_OFFSET;
+  breakpoint;
   semid = [[PTBR + 2*(userSP-4)/512]*512 + (userSP-4)%512];
-  if(semid<0 || semid>7 || [resTab + 2*semid] != 1) then
+  if(semid<0 || semid>7 || [resTab + 2*semid] != SEMAPHORE) then
     [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = -1;
     SP = userSP;
     [procTab + 9] = 0;
@@ -28,7 +30,7 @@ if(syscall == 19) then
   
   alias semind R7;
   semind = [resTab + 2*semid + 1];
-  while([SEMAPHORE_TABLE + semid*4] != -1 && [SEMAPHORE_TABLE + semid*4] != currPID) do
+  while([SEMAPHORE_TABLE + semind*4] != -1 && [SEMAPHORE_TABLE + semind*4] != currPID) do
     [procTab + 4] = WAIT_SEMAPHORE;
     [procTab + 5] = semind;
     multipush(R1, R2, R3, R4, R5, R6, R7);
