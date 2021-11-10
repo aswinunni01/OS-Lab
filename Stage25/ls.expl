@@ -15,7 +15,7 @@ begin
    break;
  endif;
  temp = exposcall("Write", -2, fName);
- temp = exposcall("Seek", fileDesc, 8);
+ temp = exposcall("Seek", fileDesc, 7);
  endwhile;
 
  return 0;

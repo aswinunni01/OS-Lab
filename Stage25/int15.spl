@@ -27,12 +27,15 @@ multipop(R1, R2, R3);
 alias i R4;
 i=0;
 while(i<4) do
+  breakpoint;
   if([BUFFER_TABLE + 4*i + 1] == 1) then
     multipush(R1, R2, R3, R4);
     R1 = DISK_STORE;
     R2 = currPID;
-    R4 = [BUFFER_TABLE + 4*i];
     R3 = BUFFER_BASE + i;
+    R4 = [BUFFER_TABLE + 4*i];
+    call DEVICE_MANAGER;
+    multipop(R1, R2, R3, R4);
   endif;
 i = i + 1;
 endwhile;

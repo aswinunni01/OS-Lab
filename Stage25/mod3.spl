@@ -117,10 +117,10 @@ if(fnNum == BUFFERED_READ || fnNum == BUFFERED_WRITE) then
 
   if([BUFFER_TABLE + 4*bufferNum] != diskBlock) then
     if([BUFFER_TABLE + 4*bufferNum + 1] == 1) then
-
+    breakpoint;
     multipush(R1, R2, R3, R4, R5);
     R1 = DISK_STORE;
-    R4 = diskBlock;
+    R4 = [BUFFER_TABLE + 4*bufferNum];
     R2 = [SYSTEM_STATUS_TABLE + 1];
     R3 = BUFFER_BASE + bufferNum;
     call DEVICE_MANAGER;
@@ -139,11 +139,12 @@ if(fnNum == BUFFERED_READ || fnNum == BUFFERED_WRITE) then
   endif;
 
   if(fnNum == BUFFERED_READ) then
-  [varAddr] = [BUFFER + bufferNum *512 + offset];
+  [word] = [BUFFER + bufferNum *512 + offset];
   endif;
 
   if(fnNum == BUFFERED_WRITE) then
   [BUFFER + bufferNum*512 + offset] = word;
+  [BUFFER_TABLE + bufferNum*4 + 1] = 1;
   endif;
 
   R1 = RELEASE_BUFFER;

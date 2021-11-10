@@ -47,7 +47,6 @@ if(syscall == 2) then
   multipop(R1, R2, R3, R4, R6);
 
   if(R0 == -1 || R0 == -1) then
-    breakpoint;
     R11 = R0;
     goto retLabel;
   endif;
@@ -61,7 +60,7 @@ endif;
 
 if(syscall == 3) then
   alias fileDesc R4;
-  R11 = 4;
+  R11 = userSP - 4;
   call stkval;
   fileDesc = R11;
 
@@ -100,7 +99,7 @@ endif;
 
 if(syscall == 6) then
   alias fileDesc R4;
-  R11 = 4;
+  R11 = userSP - 4;
   call stkval;
   fileDesc = R11;
 
@@ -140,15 +139,15 @@ if(syscall == 6) then
     fileSize = 480;
   else
     fileSize = [INODE_TABLE + 16*inodeIndex + 2];
-
+  endif;
   alias lseek R9;
   lseek = [OPEN_FILE_TABLE + 4*openFileIndex + 2];
 
   alias offset R10;
-  R11 = 3;
+  R11 = userSP - 3;
   call stkval;
   offset = R11;
- 
+  breakpoint;
   if(lseek + offset < 0) then
 
     multipush(R1, R2, R3);
@@ -196,4 +195,3 @@ retLabel:
   [procTab + 9] = 0;
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
   ireturn;
-

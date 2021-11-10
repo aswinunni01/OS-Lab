@@ -151,6 +151,7 @@ if(fnNumber == KILL_ALL) then
       call RESOURCE_MANAGER;
       multipop(R1, R2, R3, R4, R5);
     endif;
+  i = i + 1;
   endwhile;
 
   i = 2;
@@ -175,6 +176,7 @@ if(fnNumber == KILL_ALL) then
       call RESOURCE_MANAGER;
       multipop(R1, R2, R3, R4, R5);
     endif;
+  i = i + 1;
   endwhile;
 
   return;

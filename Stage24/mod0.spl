@@ -22,7 +22,7 @@ if(functionNum == ACQUIRE_INODE) then
   alias procTab R4;
   procTab = PROCESS_TABLE + currPID*16;
 
-  while([FILE_STATUS_TABLE + 4*inodeIndex] != -1) do
+  while([FILE_STATUS_TABLE + 4*inodeIndex] != -1 && [FILE_STATUS_TABLE + 4*inodeIndex] != currPID) do
      [procTab + 4] = WAIT_FILE;
      [procTab + 5] = inodeIndex;
      multipush(R1, R2, R3, R4);
