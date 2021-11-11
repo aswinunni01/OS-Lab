@@ -1,0 +1,21 @@
+decl
+  int a;
+enddecl
+
+int main(){
+decl
+  int temp, uid;
+enddecl
+begin
+
+  uid = 0;
+  while(uid<16) do
+    temp  = exposcall("Getuname", uid);
+    if(temp != -1) then
+      temp = exposcall("Write", -2, temp);
+    endif;
+  uid = uid + 1;
+  endwhile;
+  return 0;
+end
+}
