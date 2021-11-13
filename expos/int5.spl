@@ -1,0 +1,197 @@
+// INT 5 - open and close
+
+alias userSP R1;
+userSP = SP;
+
+alias currPID R2;
+currPID = [SYSTEM_STATUS_TABLE + 1];
+
+alias procTab R3;
+procTab = PROCESS_TABLE + currPID*16;
+
+[procTab + 13] = SP;
+SP = [procTab + 11]*512 - 1;
+
+alias syscall R4;
+R11 = userSP - 5;
+call stkval;
+syscall = R11;
+
+[procTab + 9] = syscall;
+
+if(syscall == 2) then
+  alias i R4;
+  alias fileName R5;
+  R11 = userSP-4;
+  call stkval;
+  fileName = R11;
+  alias resTab R6;
+  resTab  = [procTab + 11]*512 + RESOURCE_TABLE_OFFSET;
+  i = 0;
+  while(i<8) do
+    if([resTab + 2*i] == -1) then
+      break;
+    endif;
+  i = i + 1;
+  endwhile;
+  
+  if(i == 16) then
+    R11 = -3;
+    goto retLabel;
+  endif;
+  
+  multipush(R1, R2, R3, R4, R6);
+  R1 = OPEN;
+  R2 = fileName;
+  call FILE_MANAGER;
+  multipop(R1, R2, R3, R4, R6);
+
+  if(R0 == -1 || R0 == -1) then
+    R11 = R0;
+    goto retLabel;
+  endif;
+
+  [resTab + 2*i] = FILE;
+  [resTab + 2*i  + 1] = R0;
+  R11 = i;
+  goto retLabel;
+
+endif;
+
+if(syscall == 3) then
+  alias fileDesc R4;
+  R11 = userSP - 4;
+  call stkval;
+  fileDesc = R11;
+
+  if(fileDesc < 0 || fileDesc > 7) then
+    R11 = -1;
+    goto retLabel;
+  endif;
+
+  alias resTab R5;
+  resTab  = [procTab + 11]*512 + RESOURCE_TABLE_OFFSET + fileDesc*2;
+
+  if([resTab] != FILE) then
+    R11 = -1;
+    goto retLabel;
+  endif;
+
+  alias openFileIndex R6;
+  openFileIndex = [resTab + 1];
+  
+  multipush(R1, R2, R3, R4, R5, R6);
+  R1 = CLOSE;
+  R2 = openFileIndex;
+  call FILE_MANAGER;
+  multipop(R1, R2, R3, R4, R5, R6);
+
+  [resTab] = -1;
+  [resTab + 1] = -1;
+  
+  R11 = 0;
+  goto retLabel;
+
+
+
+endif;
+
+
+if(syscall == 6) then
+  alias fileDesc R4;
+  R11 = userSP - 4;
+  call stkval;
+  fileDesc = R11;
+
+  if(fileDesc < 0 || fileDesc > 7) then
+    R11 = -1;
+    goto retLabel;
+  endif;  
+
+  alias resTab R5;
+  resTab = [procTab + 11]*512 + RESOURCE_TABLE_OFFSET + fileDesc*2;
+  
+  if([resTab] != FILE) then
+    R11 = -1;
+    goto retLabel;
+  endif;
+
+  alias openFileIndex R6;
+  openFileIndex = [resTab + 1];
+
+  alias inodeIndex R7;
+  inodeIndex = [OPEN_FILE_TABLE + 4*openFileIndex];
+ 
+  multipush(R1, R2, R3, R4, R5, R6, R7);
+  R1 = ACQUIRE_INODE;
+  R3 = currPID;
+  R2 = inodeIndex;
+  call RESOURCE_MANAGER;
+  multipop(R1, R2, R3, R4, R5, R6, R7);
+
+  if(R0 == -1) then
+    R11 = -1;
+    goto retLabel;
+  endif;
+
+  alias fileSize R8;
+  if(inodeIndex == INODE_ROOT) then
+    fileSize = 480;
+  else
+    fileSize = [INODE_TABLE + 16*inodeIndex + 2];
+  endif;
+  alias lseek R9;
+  lseek = [OPEN_FILE_TABLE + 4*openFileIndex + 2];
+
+  alias offset R10;
+  R11 = userSP - 3;
+  call stkval;
+  offset = R11;
+  breakpoint;
+  if(lseek + offset < 0) then
+
+    multipush(R1, R2, R3);
+    R1 = RELEASE_INODE;
+    R3 = currPID;
+    R2 = inodeIndex;
+    call RESOURCE_MANAGER;
+    multipop(R1, R2, R3);
+    R11 = -2;
+    goto retLabel;
+  endif;
+
+  if(offset == 0) then
+    [OPEN_FILE_TABLE + 4*openFileIndex + 2] = 0;
+  
+  else
+  if(lseek + offset > fileSize) then
+    [OPEN_FILE_TABLE + 4*openFileIndex + 2] = fileSize;
+  
+  else
+
+    [OPEN_FILE_TABLE + 4*openFileIndex + 2] = lseek + offset;
+  endif;
+  endif;
+
+
+  multipush(R1, R2, R3);
+  R1 = RELEASE_INODE;
+  R3 = currPID;
+  R2 = inodeIndex; 
+  call RESOURCE_MANAGER;
+  multipop(R1, R2, R3);
+
+  R11 = 0;
+  goto retLabel;
+ 
+endif;
+
+stkval:
+  R11 = [[PTBR + 2*(R11)/512]*512 + (R11)%512];
+  return;
+
+retLabel:
+  SP = userSP;
+  [procTab + 9] = 0;
+  [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
+  ireturn;

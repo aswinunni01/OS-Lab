@@ -1,0 +1,57 @@
+// Exception handler
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 9] = -1;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 11]*512 - 1;
+
+backup;
+alias userSP R1; 
+userSP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
+alias currentPID R0;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+multipush(EIP);
+
+if((EC != 0) || (userSP == (PTLR*512) -1)) then
+	print "Fatal exc";
+	multipush(R0, R1);
+	R1 = 3;
+	R2 = currentPID;
+	call MOD_1;
+	call MOD_5;
+	multipop(R0, R1);
+endif;
+alias blockNum R2;
+if((EPN >3)&& (EPN < 8)) then // code page
+	blockNum = [DISK_MAP_TABLE + currentPID*10 + 4 + EPN - 4];
+	multipush(R0, R1, R2);
+	R1 = 5;
+	R2 = blockNum;
+	call MOD_2;
+	[PTBR + 2*EPN] = R0;
+	[PTBR + 2*EPN + 1] = "1100";
+	multipop(R0, R1, R2);
+endif;
+
+if(EPN >1 && EPN < 4) then
+	multipush(R0, R1, R2);
+	R1 = 1;
+	call MOD_2;
+	[PTBR + 2*2] = R0;
+	[PTBR + 2*2 + 1] = "1110";
+	R1 = 1;
+        call MOD_2;
+        [PTBR + 2*3] = R0;
+        [PTBR + 2*3 + 1] = "1110";
+	multipop(R0, R1, R2);
+endif;
+
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
+multipop(EIP);
+restore;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
+SP = SP + 1;
+[[PTBR + 2*(SP / 512)]*512 + (SP %512)] = EIP;
+ireturn;
+
+
+

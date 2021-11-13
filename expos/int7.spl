@@ -1,0 +1,143 @@
+//Set mode flag to system call number
+[(PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16)+ 9] = 5;
+
+alias userSP R1;
+userSP = SP;
+
+alias currPID R2;
+currPID = [SYSTEM_STATUS_TABLE + 1];
+alias procTab R3;
+procTab = PROCESS_TABLE + 16*currPID;
+
+//Store user stack pointer in UPTR
+[procTab+13] = userSP;
+
+//Set SP to start of kernel stack (User area)
+SP = [procTab+11]*512;
+
+alias fileDesc R4;
+fileDesc = [[PTBR + 2*(userSP -4)/512]*512 + (userSP-4)%512];
+
+alias word R5;
+word = [[PTBR + 2*(userSP - 3)/512]*512 + (userSP -3)%512];
+if(fileDesc!=-2) then
+
+	if(fileDesc < 0 || fileDesc > 7) then
+	  R11 = -1;
+	  goto retLabel;
+	endif;
+ 
+	alias resTab R6;
+	resTab = [procTab + 11]*512 + RESOURCE_TABLE_OFFSET;
+	
+	if([resTab + 2*fileDesc] != FILE) then
+	  R11 = -1;
+	  goto retLabel;
+	endif;
+	
+	alias openFileIndex R7;
+	openFileIndex = [resTab + 2*fileDesc + 1];
+	
+	alias inodeIndex R8;
+	inodeIndex = [OPEN_FILE_TABLE + 4*openFileIndex];
+	
+	if([procTab + 3] != 1 && [INODE_TABLE + 16*inodeIndex + 3] != [procTab + 3] && [INODE_TABLE + inodeIndex*16 + 4] == EXCLUSIVE) then
+	  R11 = -3;
+	  goto retLabel;
+	endif;
+	
+	multipush(R1, R2, R3, R4, R5, R6, R7, R8);
+	R1 = ACQUIRE_INODE;
+	R3 = currPID;
+	R2 = inodeIndex;
+	call RESOURCE_MANAGER;
+	multipop(R1, R2, R3, R4, R5, R6, R7, R8);
+
+	if(R0 == -1) then
+	  R11 = -1;
+	  goto retLabel;
+	endif;
+
+	alias lseek R9;
+	lseek = [OPEN_FILE_TABLE + 4*openFileIndex + 2];
+	
+	if(lseek == MAX_FILE_SIZE) then
+	  multipush(R1, R2, R3);
+	  R1 = RELEASE_INODE;
+	  R3 = currPID;
+	  R2 = inodeIndex;
+	  call RESOURCE_MANAGER;
+	  multipop(R1, R2, R3);
+	  R11 = -2;
+	  goto retLabel;
+	endif;
+	
+	if(lseek%512 == 0 && lseek == [INODE_TABLE + 16*inodeIndex + 2]) then
+	  breakpoint;
+	  multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+	  R1 = GET_FREE_BLOCK;
+	  call MEMORY_MANAGER;
+	  multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+	  
+ 	  if(R0 == -1) then
+	    multipush(R1, R2, R3);
+	    R1 = RELEASE_INODE;
+	    R3 = currPID;
+	    R2 = inodeIndex;
+	    call RESOURCE_MANAGER;
+	    multipop(R1, R2, R3);
+	    R11 = -2;
+	    goto retLabel;
+	  endif;
+
+	  [INODE_TABLE + inodeIndex*16 + 8 + lseek/512] = R0;
+	endif;
+	
+	alias blockNum R10;
+	alias offset R12;
+	blockNum = [INODE_TABLE + inodeIndex*16 + 8 + lseek/512];
+	offset = lseek%512;
+	
+	multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R12);
+	R1 = BUFFERED_WRITE;
+	R2 = blockNum;
+	R3 = offset;
+	R4 = word;
+	call FILE_MANAGER;
+	multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R12);
+	
+	if(lseek == [INODE_TABLE + 16*inodeIndex + 2]) then
+	  [INODE_TABLE + 16*inodeIndex + 2] = [INODE_TABLE + 16*inodeIndex + 2] + 1;
+	endif;
+
+	[OPEN_FILE_TABLE + openFileIndex*4 + 2] = [OPEN_FILE_TABLE + openFileIndex*4 + 2] + 1;
+	
+	multipush(R1, R2, R3);
+	R1 = RELEASE_INODE;
+	R3 = currPID;
+	R2 = inodeIndex;
+	call RESOURCE_MANAGER;
+	multipop(R1, R2, R3);
+	R11 = 0;
+	goto retLabel;
+
+else
+
+	multipush(R0, R1, R2, R3, R4, R5);
+	R1 = TERMINAL_WRITE;
+	R2 = [SYSTEM_STATUS_TABLE + 1];
+	R3 = word;
+	call DEVICE_MANAGER;
+
+	multipop(R0, R1, R2, R3, R4, R5);
+	R11 = 0;
+	goto retLabel;
+endif;
+
+retLabel:
+  [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
+  SP = userSP;
+  [procTab+ 9] = 0;
+  
+ireturn;
+

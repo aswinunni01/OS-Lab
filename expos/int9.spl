@@ -1,0 +1,148 @@
+alias userSP R0;
+userSP = SP;
+
+alias currentPID R1;
+R1 = [SYSTEM_STATUS_TABLE + 1];
+
+alias process_table R2;
+R2 = PROCESS_TABLE + currentPID*16;
+
+[process_table + 13] = userSP;
+SP = [process_table + 11];
+breakpoint;
+[process_table + 9] = 9;
+
+alias fileName R3;
+
+fileName = [[PTBR + 2*((userSP-4) / 512)]*512 + ((userSP-4)%512)];
+
+alias inodeEntry R4;
+alias flag R5;
+inodeEntry = 0;
+flag = 0;
+while(inodeEntry < MAX_FILE_NUM) do
+	if(fileName == [INODE_TABLE + inodeEntry*16 + 1]) then
+		if([INODE_TABLE + inodeEntry*16 + 0] == EXEC) then
+			flag = 1;
+			break;
+		endif;
+	endif;
+	inodeEntry = inodeEntry + 1;
+endwhile;
+
+if(flag == 0) then
+	[[PTBR + 2*((userSP-1) / 512)]*512 + ((userSP-1)%512)] = -1;
+	[process_table + 9] = 0;
+	SP = userSP;
+	ireturn;
+endif;
+
+multipush(R0, R1, R2, R3, R4, R5);
+R2 = currentPID;
+R1 = 3;
+call MOD_1;
+
+multipop(R0, R1, R2, R3, R4, R5);
+
+alias userAreaPage R5;
+userAreaPage = [process_table + 11];
+[MEMORY_FREE_LIST + userAreaPage] = [MEMORY_FREE_LIST + userAreaPage] + 1;
+[SYSTEM_STATUS_TABLE + 2] = [SYSTEM_STATUS_TABLE + 2] - 1;
+
+SP = userAreaPage * 512;
+[process_table + 4] = RUNNING;
+[process_table + 7] = inodeEntry;
+
+[PTBR+0] = 63;
+[PTBR+1] = "0100";
+[PTBR+2] = 64;
+[PTBR+3] = "0100";
+
+// Heap
+multipush(R0, R1, R2, R3, R4, R5);
+//R1 = 1;
+//call MOD_2;
+[PTBR+4] = -1;
+[PTBR+5] = "0000";
+
+[PTBR+6] = -1;
+[PTBR+7] = "0000";
+
+// Stack
+R1 = 1;
+call MOD_2;
+[PTBR+16] = R0;
+[PTBR+17] = "0110";
+R1 = 1;
+call MOD_2;
+[PTBR+18] = R0;
+[PTBR+19] = "0110";
+multipop(R0, R1, R2, R3, R4, R5);
+
+// Code
+alias nBlocks R6;
+alias i R7;
+
+nBlocks = (([INODE_TABLE + 16*inodeEntry + 2]-1) /512) + 1;
+
+multipush(R0, R1, R2, R3, R4, R5, R6);
+R1 = 5;
+R2 = [INODE_TABLE + inodeEntry*16 + 8 + 0];
+call MOD_2;
+[PTBR + 8] = R0;
+[PTBR + 9] = "0100";
+
+i=1;
+while(i<4) do
+	[PTBR + 8 + 2*i] = -1;
+	[PTBR + 9 + 2*i] = "0000";
+i = i + 1;
+endwhile;
+multipop(R0, R1, R2, R3, R4, R5, R6);
+
+// Initialize Disk Map Table
+i=2;
+while(i<10) do
+if(i==2 || i==3) then // Heap
+	[DISK_MAP_TABLE + currentPID*10 + i] = -1;
+else
+if(i==8 || i==9) then // Stack
+	[DISK_MAP_TABLE + currentPID*10 + i] = -1;
+else
+breakpoint;
+if((i-4)<nBlocks) then // Code
+	[DISK_MAP_TABLE + currentPID*10  + i] = [INODE_TABLE + inodeEntry*16 + 8 + (i-4)];
+
+else
+	[DISK_MAP_TABLE + currentPID*10 + i] = -1;
+endif;
+endif;
+endif;
+i = i + 1;
+endwhile;
+
+//i=0;
+//while(i<nBlocks) do
+//	multipush(R0, R1, R2, R3, R4, R5);
+//	R2 = R1;
+//	R1 = 2;
+//	R3 = [PTBR+8+2*i];
+//	R4 = [INODE_TABLE + inodeEntry*16 + 8 + i];
+//	breakpoint;
+//	call MOD_4;
+//	multipop(R0, R1, R2, R3, R4, R5);	
+//i = i + 1;
+//endwhile;
+
+i = 1;
+while(i<9) do
+	[([PROCESS_TABLE + currentPID*16 + 11]+1) *512 - 2*i] = -1;
+i = i + 1;
+endwhile;
+
+
+
+[[PTBR + 16]*512] = [[PTBR+8]*512+ 1];
+SP = 8*512;
+[process_table + 9] = 0;
+ireturn;

@@ -1,0 +1,156 @@
+// MOD_3 FILE_MANAGER
+
+alias fnNum R1;
+
+if(fnNum == OPEN) then
+  alias fileName R2;
+  alias i R3;
+
+  i =  0;
+
+  while(i<MAX_FILE_NUM) do
+    if([INODE_TABLE + 16*i + 1] == fileName) then
+      break;
+    endif;
+    i = i + 1;
+  endwhile;
+
+  if(i == MAX_FILE_NUM) then 
+    R0 = -1;
+    return;
+  endif;
+  
+  multipush(R1, R2, R3);
+  R1 = ACQUIRE_INODE;
+  R2 = i;
+  R3 = [SYSTEM_STATUS_TABLE + 1];
+  call RESOURCE_MANAGER;
+  multipop(R1, R2, R3);
+  
+  if(R0 == -1) then
+    R0 = -1;
+    return;
+  endif;
+
+  if([INODE_TABLE + 16*i] == EXEC) then
+    R0 = -1;
+    return;
+  endif;
+
+  alias inodeIndex R4;
+  inodeIndex = i;
+  
+  i = 0;
+  while(i<MAX_OPENFILE_NUM) do
+    if([OPEN_FILE_TABLE + 4*i] == -1) then
+      break;
+    endif;
+    i = i + 1;
+  endwhile;
+
+  if(i == MAX_OPENFILE_NUM) then
+    R0 = -2;
+    return;
+  endif;
+  
+  if(fileName == "root") then
+    [OPEN_FILE_TABLE + 4*i] = INODE_ROOT;
+  else
+    [OPEN_FILE_TABLE + 4*i] = inodeIndex;
+    if([FILE_STATUS_TABLE + 4*inodeIndex + 1] == -1) then
+      [FILE_STATUS_TABLE + 4*inodeIndex + 1] = 1;
+    else
+      [FILE_STATUS_TABLE + 4*inodeIndex + 1] = [FILE_STATUS_TABLE + 4*inodeIndex + 1] + 1;
+    endif;
+  endif;
+
+  [OPEN_FILE_TABLE + 4*i + 1] = 1;
+  [OPEN_FILE_TABLE + 4*i + 2] = 0;
+  
+  multipush(R1, R2, R3, R4);
+  R1 = RELEASE_INODE;
+  R2 = inodeIndex;
+  R3 = [SYSTEM_STATUS_TABLE + 1];
+  call RESOURCE_MANAGER;
+  multipop(R1 ,R2, R3, R4);
+  R0 = i;
+  return;
+endif;
+
+if(fnNum == CLOSE) then
+  breakpoint;
+  alias openFileIndex R2;
+  alias inodeIndex R3;
+  alias openFileTab R4;
+  openFileTab = OPEN_FILE_TABLE + 4*openFileIndex;
+  inodeIndex = [openFileTab];
+  [openFileTab + 1]  = [openFileTab + 1] - 1;
+  if([openFileTab + 1] == 0) then
+    [openFileTab] = -1;
+    [openFileTab + 1] = -1;
+    [ openFileTab + 2] = -1;
+    [openFileTab + 3] = -1;
+    if(inodeIndex != INODE_ROOT) then
+      [FILE_STATUS_TABLE + inodeIndex*4 + 1] = [FILE_STATUS_TABLE + inodeIndex*4 + 1] - 1;
+      if([FILE_STATUS_TABLE + inodeIndex*4 + 1] == 0) then
+        [FILE_STATUS_TABLE + inodeIndex*4 + 1] = -1;
+      endif;
+    endif;
+  endif;
+  return;
+
+endif;
+
+if(fnNum == BUFFERED_READ || fnNum == BUFFERED_WRITE) then
+  alias diskBlock R2;
+  alias offset R3;
+  alias varAddr R4;
+  alias word R4;
+  alias bufferNum R5;
+  bufferNum = diskBlock%4;
+
+  multipush(R1, R2, R3, R4, R5);
+  R1 = ACQUIRE_BUFFER;
+  R2 = bufferNum;
+  R3 = [SYSTEM_STATUS_TABLE + 1];
+  call RESOURCE_MANAGER;
+  multipop(R1, R2, R3, R4, R5);
+
+  if([BUFFER_TABLE + 4*bufferNum] != diskBlock) then
+    if([BUFFER_TABLE + 4*bufferNum + 1] == 1) then
+    multipush(R1, R2, R3, R4, R5);
+    R1 = DISK_STORE;
+    R4 = [BUFFER_TABLE + 4*bufferNum];
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = BUFFER_BASE + bufferNum;
+    call DEVICE_MANAGER;
+    multipop(R1, R2, R3, R4, R5);
+    [BUFFER_TABLE + 4*bufferNum + 1] = 0;
+    endif;
+
+  multipush(R1, R2, R3, R4, R5);
+  R1 = DISK_LOAD;
+  R4 = diskBlock;
+  R3 = BUFFER_BASE + bufferNum;
+  R2 = [SYSTEM_STATUS_TABLE + 1];
+  call DEVICE_MANAGER;
+  multipop(R1, R2, R3, R4, R5);
+  [BUFFER_TABLE + 4*bufferNum] = diskBlock;
+  endif;
+
+  if(fnNum == BUFFERED_READ) then
+  [word] = [BUFFER + bufferNum *512 + offset];
+  endif;
+
+  if(fnNum == BUFFERED_WRITE) then
+  [BUFFER + bufferNum*512 + offset] = word;
+  [BUFFER_TABLE + bufferNum*4 + 1] = 1;
+  endif;
+
+  R1 = RELEASE_BUFFER;
+  R2 = bufferNum;
+  R3 = [SYSTEM_STATUS_TABLE + 1];
+  call RESOURCE_MANAGER;
+  return;
+ 
+endif;
