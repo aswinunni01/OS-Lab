@@ -17,7 +17,7 @@ alias state R3;
 alias newPID R4;
 
 if([SYSTEM_STATUS_TABLE + 5] != 0 ) then
-  if([PROCESS_TABLE + 244] != READY && [PROCESS_TABLE + 244] != CREATED) then
+  if([PROCESS_TABLE + 244] == WAIT_DISK) then
     newPID = 0;
 
   else
