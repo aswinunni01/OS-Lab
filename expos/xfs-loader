@@ -2,6 +2,9 @@ fdisk
 load --os /home/aswin/OS-Lab/expos/os-startup.xsm
 load --module 7 /home/aswin/OS-Lab/expos/boot-module.xsm
 load --exhandler /home/aswin/OS-Lab/expos/exhandle.xsm
+load --init /home/aswin/OS-Lab/expos/login.xsm
+load --idle /home/aswin/OS-Lab/expos/idle.xsm
+load --library /home/aswin/OS-Lab/expos/library.lib
 load --int=timer /home/aswin/OS-Lab/expos/timer.xsm
 load --int=disk /home/aswin/OS-Lab/expos/diskint.xsm
 load --int=console /home/aswin/OS-Lab/expos/consoleint.xsm

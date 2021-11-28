@@ -1,0 +1,190 @@
+// Pager module (MOD 6)
+
+alias fnNum R1;
+alias pid R2;
+
+if(R1 == SWAP_OUT) then
+  alias i R3;
+  i = 0;
+  alias procTab R4;
+  alias reqpid R5;
+  alias condn R6;
+  condn = WAIT_PROCESS;
+
+findproc:
+  while(i< MAX_PROC_NUM) do
+    procTab = PROCESS_TABLE + 16*i;
+    if([procTab + 4] == condn) then
+      reqpid = i;
+      break;
+    endif;
+  i = i + 1;
+  endwhile;
+  
+  if(i == MAX_PROC_NUM && condn == WAIT_PROCESS) then
+    condn = WAIT_SEMAPHORE;
+    goto findproc;
+  endif;
+  if(i == MAX_PROC_NUM && condn == WAIT_SEMAPHORE) then
+    i = 0;
+    reqpid = -1;
+    alias maxtick R7;
+    while(i<MAX_PROC_NUM) do
+      procTab = PROCESS_TABLE + 16*i;
+      if([procTab] > maxtick && [procTab + 4] != ALLOCATED && [procTab + 4] != RUNNING && [procTab + 4] != TERMINATED && [procTab + 6] != 1) then
+	maxtick = [procTab];
+	reqpid = i;
+      endif;
+     i = i + 1;
+     endwhile;
+    endif;
+
+   if(reqpid == -1) then
+     [SYSTEM_STATUS_TABLE + 5] = 0;
+     return;
+   endif;
+
+   procTab = PROCESS_TABLE + 16*reqpid;
+   [procTab] = 0;
+
+   i = 2;
+   while(i<MAX_PROC_PAGES) do
+     if(i>3 && i<8) then
+     if([PTBR + 2*i] != -1) then
+     
+     multipush(R1, R2, R3, R4, R5, R6, R7);
+     R1 = RELEASE_PAGE;
+     R2 = [PTBR + 2*i];
+     call MEMORY_MANAGER;
+     multipop(R1, R2, R3, R4, R5, R6, R7);
+     endif;
+     [PTBR + 2*i] = -1;
+     [PTBR + 2*i + 1] = "0000";
+     endif;
+
+     if(i>1 && i<4) then
+     if([PTBR + 2*i] != -1 && [MEM_FREE_LIST + [PTBR + 2*i]] <2) then
+       multipush(R1, R2, R3, R4, R5, R6, R7);
+       R1 = GET_SWAP_BLOCK;
+       call MEMORY_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       [DISK_MAP_TABLE + 10*reqpid + i] = R0;
+       multipush(R1, R2, R3, R4, R5, R6, R7);
+       R1 = DISK_STORE;
+       R2 = pid;
+       R3 = [PTBR + 2*i];
+       R4 = R0;
+       call DEVICE_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       R1 = RELEASE_PAGE;
+       R2 = [PTBR + 2*i];
+       call MEMORY_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       [PTBR + 2*i] = -1;
+       [PTBR + 2*i + 1] = "0000";
+     endif;
+     endif;
+     if(i>7 && i<10) then
+       multipush(R1, R2, R3, R4, R5, R6, R7);
+       R1 = GET_SWAP_BLOCK;
+       call MEMORY_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       [DISK_MAP_TABLE + 10*reqpid + i] = R0;
+       multipush(R1, R2, R3, R4, R5, R6, R7);
+       R1 = DISK_STORE;
+       R2 = pid;
+       R3 = [PTBR + 2*i];
+       R4 = R0;
+       call DEVICE_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       multipush(R1, R2, R3, R4, R5, R6, R7);
+       R1 = RELEASE_PAGE;
+       R2 = [PTBR + 2*i];
+       call MEMORY_MANAGER;
+       multipop(R1, R2, R3, R4, R5, R6, R7);
+       [PTBR + 2*i] = -1;
+       [PTBR + 2*i + 1] = "0000";
+    endif;
+  i = i + 1;
+  endwhile; 
+
+  [procTab + 6] = 1;
+  [SYSTEM_STATUS_TABLE + 4] = [SYSTEM_STATUS_TABLE + 4] + 1;
+  [SYSTEM_STATUS_TABLE + 5] = 0;
+  return;
+endif;
+
+
+if(fnNum == SWAP_IN) then
+  alias i R3;
+  i = 0;
+  alias procTab R4;
+  alias reqpid R5;
+  while(i<MAX_PROC_NUM) do
+     procTab = PROCESS_TABLE + 16*i;
+     if([procTab] > maxtick && [procTab + 4] == READY && [procTab + 6] == 1) then
+       reqpid = i;
+       break;
+     endif;
+  i = i + 1;
+  endwhile;
+
+  if(reqpid == -1) then
+    [SYSTEM_STATUS_TABLE + 5] = 0;
+    return;
+  endif;
+
+  procTab = PROCESS_TABLE + 16*reqpid;
+  [procTab] = 0;
+
+  i = 2;
+
+  while(i<MAX_PROC_PAGES) do
+    if(i>1 && i<4) then
+      if([DISK_MAP_TABLE + 10*reqpid + i) != -1) then
+        multipush(R1, R2, R3, R4, R5);
+	R1 = GET_FREE_PAGE;
+        call MEMORY_MANAGER;
+        multipop(R1, R2, R3, R4, R5);
+
+	[PTBR + 2*i] = R0;
+	[PTBR + 2*i + 1] = "0110";
+	call diskload;
+	call relblock;
+	[DISK_MAP_TABLE + 10*reqpid + i] = -1;
+
+      endif; 
+
+    endif;
+    if(i > 7 && i <10) then
+      call getFreepage;
+      call setPt;
+      call diskload;
+      call relblock;
+      [DISK_MAP_TABLE + 10*reqpid + i] = -1;
+    endif;
+
+  i = i + 1;
+  endwhile;
+
+
+
+endif;
+
+relblock:
+        multipush(R1, R2, R3, R4, R5);
+	R1 = RELEASE_BLOCK;
+	R2 = [DISK_MAP_TABLE + 10*reqpid + i];
+	call MEMORY_MANAGER;
+	multipop(R1, R2, R3, R4, R5);
+	return;
+
+diskload:
+	multipush(R1, R2, R3, R4, R5);
+	R4 = [DISK_MAP_TABLE + 10*reqpid + i];
+	R1 = DISK_LOAD;
+	R2 = pid;
+	R3 = R0;
+	call DEVICE_MANAGER;
+        multipop(R1, R2, R3, R4, R5);
+	return;

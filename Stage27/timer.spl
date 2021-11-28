@@ -1,0 +1,80 @@
+// PID of current user process in in system_status_table 
+// Store user SP to UPTR in process table -> 13th word of the entry
+[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1])*16 + 13] = SP;
+
+// Set SP to start of kernel stack
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1])*16 + 11]*512 -1;
+backup;
+
+
+
+
+alias currentPID R1;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+
+if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN) then
+  
+  if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == 0) then
+  
+    multipush(R1);
+    R2 = currentPID;
+    R1 = SWAP_OUT;
+    call PAGER_MODULE;
+    multipop(R1);
+  else
+    if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == 1) then
+      multipush(R1);
+      R2 = currentPID;
+      R1 = SWAP_IN;
+      call PAGER_MODULE;
+      multipop(R1);
+
+    else
+      if(currentPID == 0) then
+         goto contswitch;
+      endif;
+    endif;
+
+  else
+
+    if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
+      [SYSTEM_STATUS_TABLE + 5] = SWAP_OUT;
+
+    else
+      if([SYSTEM_STATUS_TABLE + 4] != 0) then
+	alias i R2;
+	i = 0;
+	if([SYSTEM_STATUS_TABLE + 2] > MEM_HIGH) then
+	  goto swpin;
+	endif;
+	while(i<MAX_PROC_NUM) do
+	  if([PROCESS_TABLE + 16*i] > MAX_TICK) then
+	    [SYSTEM_STATUS_TABLE + 5] = SWAP_IN;
+	  endif;
+	i = i + 1;
+	endwhile;
+      endif;
+    endif;
+  endif;
+
+
+
+  
+
+
+
+endif;
+
+contswitch:
+alias process_table_entry R1;
+process_table_entry = PROCESS_TABLE + currentPID * 16;
+[process_table_entry + 4] = READY;
+
+
+call MOD_5;
+
+restore;
+
+[PROCESS_TABLE + 16*([SYSTEM_STATUS_TABLE + 1]) + 12] = 0;
+SP = [PROCESS_TABLE + 16*([SYSTEM_STATUS_TABLE + 1]) + 13];
+ireturn;
