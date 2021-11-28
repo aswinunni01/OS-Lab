@@ -14,7 +14,7 @@ currentPID = [SYSTEM_STATUS_TABLE + 1];
 
 if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN) then
   
-  if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == 0) then
+  if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == SWAP_OUT) then
   
     multipush(R1);
     R2 = currentPID;
@@ -22,7 +22,7 @@ if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN
     call PAGER_MODULE;
     multipop(R1);
   else
-    if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == 1) then
+    if(currentPID == 15 && [SYSTEM_STATUS_TABLE + 5] == SWAP_IN) then
       multipush(R1);
       R2 = currentPID;
       R1 = SWAP_IN;
@@ -34,9 +34,8 @@ if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN
          goto contswitch;
       endif;
     endif;
-
+  endif;
   else
-
     if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
       [SYSTEM_STATUS_TABLE + 5] = SWAP_OUT;
 
@@ -45,11 +44,13 @@ if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN
 	alias i R2;
 	i = 0;
 	if([SYSTEM_STATUS_TABLE + 2] > MEM_HIGH) then
-	  goto swpin;
+          [SYSTEM_STATUS_TABLE + 5] = SWAP_IN;
+	  goto contswitch;
 	endif;
 	while(i<MAX_PROC_NUM) do
 	  if([PROCESS_TABLE + 16*i] > MAX_TICK) then
 	    [SYSTEM_STATUS_TABLE + 5] = SWAP_IN;
+	    break;
 	  endif;
 	i = i + 1;
 	endwhile;
@@ -57,16 +58,8 @@ if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT || [SYSTEM_STATUS_TABLE + 5] == SWAP_IN
     endif;
   endif;
 
-
-
-  
-
-
-
-endif;
-
 contswitch:
-alias process_table_entry R1;
+alias process_table_entry R2;
 process_table_entry = PROCESS_TABLE + currentPID * 16;
 [process_table_entry + 4] = READY;
 

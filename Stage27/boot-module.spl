@@ -95,6 +95,10 @@ loadi(45, 58);
 loadi(46, 59);
 loadi(47, 60);
 
+//loading MOD_6
+loadi(52, 65);
+loadi(53, 66);
+
 // loading Library
 loadi(63, 13);
 loadi(64, 14);
@@ -171,7 +175,7 @@ PTLR = 10;
 // Initialize per-process resource table
 i = 0;
 while(i<8) do
-	[([PROCESS_TABLE + 27])*512 + RESOURCE_TABLE_OFFSET +  2*i] = -1;
+	[39424 + RESOURCE_TABLE_OFFSET +  2*i] = -1;
 	i = i + 1;
 endwhile;
 
@@ -226,7 +230,7 @@ endwhile;
 
 
 // Shell process PID 2
-PTBR = PAGE_TABLE_BASE + 2*20;
+PTBR = PAGE_TABLE_BASE + 40;
 PTLR = 10;
 
 
@@ -257,44 +261,47 @@ PTLR = 10;
 [PROCESS_TABLE + 45] = 8*512;
 [PROCESS_TABLE + 46] = PTBR;
 [PROCESS_TABLE + 47] = PTLR;
-[PROCESS_TABLE + 38] = 1;
-
-[MEMORY_FREE_LIST + 78] = 1;
-[MEMORY_FREE_LIST + 79] = 1;
-[MEMORY_FREE_LIST + 80] = 1;
-
+[PROCESS_TABLE + 34] = 1;
+i = 78;
+while(i<83) do
+[MEMORY_FREE_LIST + i] = 1;
+i = i + 1;
+endwhile;
 [PROCESS_TABLE + 36] = TERMINATED;
 [78*512] = [67*512 + 1];
 
 // Initialize disk map table for SHELL
-[DISK_MAP_TABLE + 22] = -1;
-[DISK_MAP_TABLE + 23] = -1;
+i = 22;
+while(i<30) do
+[DISK_MAP_TABLE + i] = -1;
+i = i + 1;
+endwhile;
 [DISK_MAP_TABLE + 24] = 9;
 [DISK_MAP_TABLE + 25] = 10;
-[DISK_MAP_TABLE + 26] = -1;
-[DISK_MAP_TABLE + 27] = -1;
-[DISK_MAP_TABLE + 28] = -1;
-[DISK_MAP_TABLE + 29] = -1;
 
 // Initialize per-process resource table
 i = 0;
 while(i<8) do
-        [([PROCESS_TABLE + 43])*512 + RESOURCE_TABLE_OFFSET +  2*i] = -1;
+        [40960 + RESOURCE_TABLE_OFFSET +  2*i] = -1;
         i = i + 1;
 endwhile;
 
 
 //i = 3;
-i=2;
+i=0;
 while(i<MAX_PROC_NUM) do
+       if(i>2) then
 	[PROCESS_TABLE + i*16 + 4] = TERMINATED;
+       endif;
+        [PROCESS_TABLE + 16*i] = 0; //tick
 	i = i+ 1;
 endwhile;
 
 [TERMINAL_STATUS_TABLE + 0] = 0;
 [DISK_STATUS_TABLE + 0] = 0;
-[SYSTEM_STATUS_TABLE + 2] = 47;
+[SYSTEM_STATUS_TABLE + 2] = 45;
 [SYSTEM_STATUS_TABLE + 3] = 0;
-
+[SYSTEM_STATUS_TABLE + 4] = 0;
+[SYSTEM_STATUS_TABLE + 5] = 0;
 return;
   
