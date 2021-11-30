@@ -1,0 +1,61 @@
+// Logout - 28
+// Arguments - NIL
+
+alias userSP R1;
+userSP = SP;
+
+alias currPID R2;
+currPID = [SYSTEM_STATUS_TABLE + 1];
+
+alias procTab R3;
+procTab = PROCESS_TABLE + currPID*16;
+
+[procTab + 9] = 28;
+
+[procTab + 13] = userSP;
+SP = [procTab + 11]*512 -1;
+
+multipush(R1, R2, R3);
+R1 = ACQUIRE_KERN_LOCK;
+call ACCESS_CONTROL;
+multipop(R1, R2, R3);
+
+if(currPID != 2) then
+  R11 = -1;
+  goto retLabel;
+endif;
+
+multipush(R1, R2, R3);
+R1 = KILL_ALL;
+R2 = currPID;
+call PROCESS_MANAGER;
+multipop(R1, R2, R3);
+
+[procTab + 4] = TERMINATED;
+[[PTBR + 16]*512] = [[PTBR + 8]*512 + 1];
+[procTab + 13] = 4096;
+
+[PROCESS_TABLE + 20] = READY;
+[SYSTEM_STATUS_TABLE] = 0;
+
+multipush(R1, R2, R3);
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call ACCESS_CONTROL;
+multipop(R1, R2, R3);
+
+call SCHEDULER;
+
+
+retLabel:
+
+  multipush(R1, R2, R3);
+  R1 = RELEASE_LOCK;
+  R2 = KERN_LOCK;
+  call ACCESS_CONTROL;
+  multipop(R1, R2, R3);
+
+  [[PTBR + 2*(userSP -1)/512]*512 + (userSP-1)%512] = R11;
+  [procTab + 9] = 0;
+  SP = [procTab + 13];
+  ireturn;

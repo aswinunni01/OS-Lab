@@ -1,0 +1,119 @@
+// SCHEDULE MOD_5
+
+R1 = ACQUIRE_SCHED_LOCK;
+call ACCESS_CONTROL;
+
+
+
+
+alias currentPID R0;
+alias process_table_entry R1;
+
+currentPID = [SYSTEM_STATUS_TABLE +  1];
+process_table_entry = PROCESS_TABLE + 16*currentPID;
+
+multipush (BP);
+
+[process_table_entry + 12] = SP % 512;
+[process_table_entry + 14] = PTBR;
+[process_table_entry + 15] = PTLR;
+
+alias i R2;
+alias state R3;
+alias newPID R4;
+
+
+if(CORE == SECONDARY_CORE && ([SYSTEM_STATUS_TABLE + 5] != 0 || [SYSTEM_STATUS_TABLE + 7]==1)) then
+  newPID = 14;
+  state = [PROCESS_TABLE + 14*16 + 4];
+  goto switch;
+endif;
+
+if( CORE == PRIMARY_CORE && [SYSTEM_STATUS_TABLE + 5] != 0 ) then
+  if([PROCESS_TABLE + 244] == WAIT_DISK) then
+    newPID = 0;
+
+  else
+    breakpoint;
+    newPID = 15;
+    state = [PROCESS_TABLE + 16*15 + 4];
+  endif;	 
+  
+else
+  alias maxp R5;
+  alias minp R6;
+  if(CORE == PRIMARY_CORE) then
+    maxp = 14;
+    minp = 1;
+  else
+    maxp = 15;
+    minp = 3;
+  endif;
+
+  newPID = 0;
+  i=minp;
+  while(i<maxp-currentPID) do
+    state = [process_table_entry + i*16 + 4];
+    if((state == READY || state == CREATED) && ([process_table_entry +  i*16 + 6] != 1)) then
+      newPID = [process_table_entry + i*16 + 1];
+      break;
+    endif;
+  i = i + 1;
+  endwhile; 
+
+if(newPID == 0) then
+  i=minp;
+  while(i<currentPID) do
+    state = [PROCESS_TABLE + i*16 + 4];
+        if((state == READY || state == CREATED) && [PROCESS_TABLE + i * 16 + 6] != 1) then
+                newPID = [PROCESS_TABLE + i*16 + 1];
+                break;
+        endif;
+        i = i + 1;
+  endwhile;
+endif;
+endif;
+switch:
+if(CORE == PRIMARY_CORE) then
+  if(newPID == 14) then
+    print("Sched1err");
+  endif;
+else
+  if(newPID == 0 || newPID == 1 || newPID == 2 || newPID == 15) then
+    [print("Sched2err");
+  endif;
+
+endif;
+
+process_table_entry = PROCESS_TABLE + (newPID * 16);
+SP = [process_table_entry + 11]*512 + [process_table_entry + 12];
+PTBR = [process_table_entry + 14];
+PTLR = [process_table_entry + 15];
+if(CORE == PRIMARY_CORE) then
+[SYSTEM_STATUS_TABLE + 1] = newPID;
+else
+[SYSTEM_STATUS_TABLE + 6] = newPID;
+endif;
+
+if(state == CREATED) then
+	SP = [process_table_entry + 13];
+	BP = [[process_table_entry+11]*512]; 
+	[process_table_entry + 4] = RUNNING;
+	[process_table_entry + 9] = 0;
+	R1 = RELEASE_LOCK;
+	R2 = SCHED_LOCK;
+	call ACCESS_CONTROL;
+	ireturn;
+endif;
+
+multipop (BP);
+[process_table_entry + 4] = RUNNING;
+R1 = RELEASE_LOCK;
+R2 = SCHED_LOCK;
+call ACCESS_CONTROL;
+return;
+
+
+
+
+

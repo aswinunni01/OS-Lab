@@ -1,0 +1,95 @@
+// Login system call - 27
+// Arguments - str:Username, str:Password
+
+alias userSP R1;
+userSP = SP;
+
+alias currPID R2;
+currPID = [SYSTEM_STATUS_TABLE + 1];
+
+alias procTab R3;
+procTab = PROCESS_TABLE + 16*currPID;
+
+[procTab + 13] = userSP;
+SP = [procTab + 11]*512 - 1;
+
+[procTab + 9] = 27;
+
+multipush(R1, R2, R3);
+R1 = ACQUIRE_KERN_LOCK;
+R2 = RELEASE_LOCK;
+call ACCESS_CONTROL;
+multipop(R1, R2, R3);
+
+
+if(currPID != 1) then
+  R11 = -2;
+  goto retLabel;
+endif;
+
+alias userName R4;
+alias password R5;
+
+R11 = (userSP - 4);
+call stkval;
+userName = R11;
+R11 = (userSP - 3);
+call stkval;
+password = R11;
+
+alias i R6;
+i=1;
+while(i<MAX_USER_NUM) do
+  if([USER_TABLE + 2*i] == userName) then
+    break;
+  endif;
+  i = i + 1;
+endwhile;
+
+if(i==MAX_USER_NUM) then
+  R11 = -1;
+  goto retLabel;
+endif;
+
+encrypt password;
+
+if(password != [USER_TABLE + 2*i + 1]) then
+  R11 = -1;
+  goto retLabel;
+endif;
+
+[PROCESS_TABLE + 36] = CREATED;
+[PROCESS_TABLE + 35] = i;
+
+[procTab + 4] = WAIT_PROCESS;
+[procTab + 5] = 2;
+
+[SYSTEM_STATUS_TABLE] = i;
+
+multipush(R1, R2, R3);
+
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call ACCESS_CONTROL;
+
+call SCHEDULER;
+multipop(R1, R2, R3);
+R11 = 0;
+goto retLabel;
+
+stkval:
+  R11 = [[PTBR + 2*(R11)/512]*512 + (R11%512)];
+  return;
+
+retLabel:
+
+  multipush(R1, R2, R3);
+  R1 = RELEASE_LOCK;
+  R2 = KERN_LOCK;
+  call ACCESS_CONTROL;
+
+
+  [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)] = R11;
+  [procTab + 9] = 0;
+  SP = userSP;
+  ireturn;
