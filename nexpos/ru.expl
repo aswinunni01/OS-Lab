@@ -1,0 +1,46 @@
+decl
+  int a;
+enddecl
+
+int main(){
+decl
+  int temp, fileDesc, rootDesc;
+  str uname, word, fileName;
+enddecl
+begin
+  temp = exposcall("Write", -2, "Enter username");
+  temp = exposcall("Read", -1, uname);
+ 
+  rootDesc = exposcall("Open", "root");
+  if(rootDesc>=0) then
+  temp = exposcall("Seek", rootDesc, 8);
+  temp = exposcall("Seek", rootDesc, 3);
+    while(a != -2) do
+      a  = exposcall("Read", rootDesc, word);
+      if(word == uname) then
+        temp =  exposcall("Seek", rootDesc, -4);
+        temp = exposcall("Read", rootDesc, fileName);
+        temp = exposcall("Write", -2, fileName);
+        temp  = exposcall("Delete", fileName);
+       
+        if(temp == -1) then
+          temp = exposcall("Write", -2, "Del perm deny");
+        else
+	  if(temp == -2) then
+	    temp = exposcall("Write", -2, "File open");
+          else
+            if(temp == 0) then
+              temp = exposcall("Write", -2, "Deleted");
+            endif;
+	  endif;
+        endif;
+        temp = exposcall("Seek", rootDesc, 3);
+      endif;
+      temp = exposcall("Seek", rootDesc, 7);
+    endwhile;
+  else
+    temp = exposcall("Write", -2, "Root perm deny");
+  endif;
+  return 0;
+end
+}

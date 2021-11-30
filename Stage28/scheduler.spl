@@ -1,5 +1,5 @@
 // SCHEDULE MOD_5
-
+breakpoint;
 R1 = ACQUIRE_SCHED_LOCK;
 call ACCESS_CONTROL;
 
@@ -9,7 +9,7 @@ call ACCESS_CONTROL;
 alias currentPID R0;
 alias process_table_entry R1;
 
-currentPID = [SYSTEM_STATUS_TABLE +  1];
+currentPID = [SYSTEM_STATUS_TABLE + 5*CORE + 1];
 process_table_entry = PROCESS_TABLE + 16*currentPID;
 
 multipush (BP);
@@ -34,7 +34,6 @@ if( CORE == PRIMARY_CORE && [SYSTEM_STATUS_TABLE + 5] != 0 ) then
     newPID = 0;
 
   else
-    breakpoint;
     newPID = 15;
     state = [PROCESS_TABLE + 16*15 + 4];
   endif;	 
@@ -80,7 +79,7 @@ if(CORE == PRIMARY_CORE) then
   endif;
 else
   if(newPID == 0 || newPID == 1 || newPID == 2 || newPID == 15) then
-    [print("Sched2err");
+    print("Sched2err");
   endif;
 
 endif;

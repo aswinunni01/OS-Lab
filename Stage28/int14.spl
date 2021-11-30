@@ -2,7 +2,7 @@ alias userSP R1;
 userSP = SP;
 
 alias currPID R2;
-currPID = [SYSTEM_STATUS_TABLE + 1];
+currPID = [SYSTEM_STATUS_TABLE + 5*CORE + 1];
 
 alias procTab R3;
 procTab = PROCESS_TABLE + 16*currPID;

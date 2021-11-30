@@ -1,0 +1,68 @@
+fdisk
+load --os=primary /home/aswin/OS-Lab/nexpos/os-startup.xsm
+load --os=secondary /home/aswin/OS-Lab/nexpos/boot-two.xsm
+load --module 7 /home/aswin/OS-Lab/nexpos/boot-module.xsm
+load --exhandler /home/aswin/OS-Lab/nexpos/exhandle.xsm
+load --init /home/aswin/OS-Lab/nexpos/login.xsm
+load --idle /home/aswin/OS-Lab/nexpos/idle.xsm
+load --library /home/aswin/OS-Lab/nexpos/library.lib
+load --int=timer /home/aswin/OS-Lab/nexpos/timer.xsm
+load --int=disk /home/aswin/OS-Lab/nexpos/diskint.xsm
+load --int=console /home/aswin/OS-Lab/nexpos/consoleint.xsm
+load --int=4 /home/aswin/OS-Lab/nexpos/int4.xsm
+load --int=5 /home/aswin/OS-Lab/nexpos/int5.xsm
+load --int=6 /home/aswin/OS-Lab/nexpos/int6.xsm
+load --int=7 /home/aswin/OS-Lab/nexpos/int7.xsm
+load --int=8 /home/aswin/OS-Lab/nexpos/int8.xsm
+load --int=9 /home/aswin/OS-Lab/nexpos/int9.xsm
+load --int=10 /home/aswin/OS-Lab/nexpos/int10.xsm
+load --int=11 /home/aswin/OS-Lab/nexpos/int11.xsm
+load --int=12 /home/aswin/OS-Lab/nexpos/int12.xsm
+load --int=13 /home/aswin/OS-Lab/nexpos/int13.xsm
+load --int=14 /home/aswin/OS-Lab/nexpos/int14.xsm
+load --int=15 /home/aswin/OS-Lab/nexpos/int15.xsm
+load --int=16 /home/aswin/OS-Lab/nexpos/int16.xsm
+load --int=17 /home/aswin/OS-Lab/nexpos/int17.xsm
+load --module 0 /home/aswin/OS-Lab/nexpos/mod0.xsm
+load --module 1 /home/aswin/OS-Lab/nexpos/mod1.xsm
+load --module 2 /home/aswin/OS-Lab/nexpos/mod2.xsm
+load --module 3 /home/aswin/OS-Lab/nexpos/mod3.xsm
+load --module 4 /home/aswin/OS-Lab/nexpos/mod4.xsm
+load --module 5 /home/aswin/OS-Lab/nexpos/scheduler.xsm
+load --module 6 /home/aswin/OS-Lab/nexpos/mod6.xsm
+load --module 8 /home/aswin/OS-Lab/nexpos/mod8.xsm
+load --shell /home/aswin/OS-Lab/nexpos/extshell.xsm
+load --exec /home/aswin/OS-Lab/nexpos/cat.xsm
+load --exec /home/aswin/OS-Lab/nexpos/cp.xsm
+load --exec /home/aswin/OS-Lab/nexpos/login.xsm
+load --exec /home/aswin/OS-Lab/nexpos/ls.xsm
+load --exec /home/aswin/OS-Lab/nexpos/lu.xsm
+load --exec /home/aswin/OS-Lab/nexpos/rm.xsm
+load --exec /home/aswin/OS-Lab/nexpos/ru.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/21Assn2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/22Assn1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/23Assn1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/23Assn2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/24Assn1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/24Assn2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/25Assn1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/25Assn2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/25Assn3.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/25Assn4.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/parent.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/child.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/seq.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/conc.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/pid.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/27Assn1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/27Assn2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/27Assn3.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/27Assn4.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/pgm1.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/pgm2.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/merge.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/m_sort.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/m_merge.xsm
+load --exec /home/aswin/OS-Lab/nexpos/Assignments/m_store.xsm
+load --data /home/aswin/OS-Lab/nexpos/Assignments/sample.dat
+load --data /home/aswin/OS-Lab/nexpos/Assignments/numbers.dat

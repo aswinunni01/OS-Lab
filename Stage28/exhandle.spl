@@ -1,8 +1,8 @@
 // Exception handler
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 9] = -1;
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 11]*512 - 1;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE + 1]*16 + 9] = -1;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 11]*512 - 1;
 
 backup;
 
@@ -10,9 +10,9 @@ R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
 
 alias userSP R1; 
-userSP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
+userSP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 13];
 alias currentPID R0;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
+currentPID = [SYSTEM_STATUS_TABLE + 5*CORE +1];
 multipush(EIP);
 
 if((EC != 0) || (userSP == (PTLR*512) -1)) then
@@ -64,7 +64,7 @@ multipop(R0);
 [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 multipop(EIP);
 restore;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13];
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE + 1]*16 + 13];
 SP = SP + 1;
 [[PTBR + 2*(SP / 512)]*512 + (SP %512)] = EIP;
 ireturn;

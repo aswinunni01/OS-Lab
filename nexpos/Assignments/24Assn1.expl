@@ -1,0 +1,32 @@
+decl
+  int a;
+enddecl
+
+int main(){
+decl
+  int temp, fileDesc;
+  str fName, data;
+enddecl
+begin
+  temp = exposcall("Write", -2, "Enter file name");
+  temp = exposcall("Read", -1, fName);
+  fileDesc = exposcall("Open", fName);
+  if((fileDesc != -1) AND (fileDesc != -2) AND (fileDesc != -3)) then 
+  while(1 == 1) do
+    breakpoint;
+    temp = exposcall("Read", fileDesc, data);
+    if(temp == -2) then
+      temp = exposcall("Write", -2, "END OF FILE");
+      break;
+    endif;
+    temp = exposcall("Write", -2, data);
+  endwhile;  
+
+  else
+    temp = exposcall("Write", -2, fileDesc);
+  endif;
+  
+
+return 0;
+end
+}

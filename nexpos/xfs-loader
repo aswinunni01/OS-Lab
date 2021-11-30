@@ -1,0 +1,55 @@
+fdisk
+load --os /home/aswin/OS-Lab/expos/os-startup.xsm
+load --module 7 /home/aswin/OS-Lab/expos/boot-module.xsm
+load --exhandler /home/aswin/OS-Lab/expos/exhandle.xsm
+load --init /home/aswin/OS-Lab/expos/login.xsm
+load --idle /home/aswin/OS-Lab/expos/idle.xsm
+load --library /home/aswin/OS-Lab/expos/library.lib
+load --int=timer /home/aswin/OS-Lab/expos/timer.xsm
+load --int=disk /home/aswin/OS-Lab/expos/diskint.xsm
+load --int=console /home/aswin/OS-Lab/expos/consoleint.xsm
+load --int=4 /home/aswin/OS-Lab/expos/int4.xsm
+load --int=5 /home/aswin/OS-Lab/expos/int5.xsm
+load --int=6 /home/aswin/OS-Lab/expos/int6.xsm
+load --int=7 /home/aswin/OS-Lab/expos/int7.xsm
+load --int=8 /home/aswin/OS-Lab/expos/int8.xsm
+load --int=9 /home/aswin/OS-Lab/expos/int9.xsm
+load --int=10 /home/aswin/OS-Lab/expos/int10.xsm
+load --int=11 /home/aswin/OS-Lab/expos/int11.xsm
+load --int=12 /home/aswin/OS-Lab/expos/int12.xsm
+load --int=13 /home/aswin/OS-Lab/expos/int13.xsm
+load --int=14 /home/aswin/OS-Lab/expos/int14.xsm
+load --int=15 /home/aswin/OS-Lab/expos/int15.xsm
+load --int=16 /home/aswin/OS-Lab/expos/int16.xsm
+load --int=17 /home/aswin/OS-Lab/expos/int17.xsm
+load --module 0 /home/aswin/OS-Lab/expos/mod0.xsm
+load --module 1 /home/aswin/OS-Lab/expos/mod1.xsm
+load --module 2 /home/aswin/OS-Lab/expos/mod2.xsm
+load --module 3 /home/aswin/OS-Lab/expos/mod3.xsm
+load --module 4 /home/aswin/OS-Lab/expos/mod4.xsm
+load --module 5 /home/aswin/OS-Lab/expos/scheduler.xsm
+load --shell /home/aswin/OS-Lab/expos/extshell.xsm
+load --exec /home/aswin/OS-Lab/expos/cat.xsm
+load --exec /home/aswin/OS-Lab/expos/cp.xsm
+load --exec /home/aswin/OS-Lab/expos/login.xsm
+load --exec /home/aswin/OS-Lab/expos/ls.xsm
+load --exec /home/aswin/OS-Lab/expos/lu.xsm
+load --exec /home/aswin/OS-Lab/expos/rm.xsm
+load --exec /home/aswin/OS-Lab/expos/ru.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/21Assn2.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/22Assn1.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/23Assn1.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/23Assn2.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/24Assn1.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/24Assn2.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/25Assn1.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/25Assn2.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/25Assn3.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/25Assn4.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/parent.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/child.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/seq.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/conc.xsm
+load --exec /home/aswin/OS-Lab/expos/Assignments/pid.xsm
+load --data /home/aswin/OS-Lab/expos/Assignments/sample.dat
+load --data /home/aswin/OS-Lab/expos/Assignments/numbers.dat

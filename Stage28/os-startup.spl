@@ -9,10 +9,19 @@ loadi(128, 512);
 loadi(69, 11);
 breakpoint;
 
-SP = 76*512;
+SP = 38912; //76*512
 call BOOT_MODULE;
 
-PTBR = PAGE_TABLE_BASE;
+
+alias i R1;
+i = 0;
+alias stp R2;
+stp = 70;
+alias procTab R3;
+
+while(i != -4) do
+procTab = PROCESS_TABLE + 16*i;
+PTBR = PAGE_TABLE_BASE + 20*i;
 PTLR = 10;
 
 [PTBR+0] = -1;
@@ -31,97 +40,62 @@ PTLR = 10;
 [PTBR+13] = "0000";
 [PTBR+14] = -1;
 [PTBR+15] = "0000";
-[PTBR+16] = 70;
+[PTBR+16] = stp;
 [PTBR+17] = "0110";
 [PTBR+18] = -1;
 [PTBR+19] = "0000";
 
 
-[PROCESS_TABLE+1] =  0;
+[procTab + 1] =  0;
+[procTab + 12] = 0;
+[procTab + 13] =  4096;
+[procTab + 14] =  PTBR;
+[procTab + 15] =  PTLR;
+
+if(i==0) then
+  i = 14;
+  stp = 83;
+else
+  if(i==14) then
+    i = 15;
+    stp = 81;
+  else
+    if(i==15) then
+	i = -4;
+    endif;
+  
+  endif;
+endif;
+
+
+endwhile;
+
 [PROCESS_TABLE+11] =  76;
-[PROCESS_TABLE+12] =  0;
-[PROCESS_TABLE+13] =  8*512;
-[PROCESS_TABLE+14] =  PTBR;
-[PROCESS_TABLE+15] =  PTLR;
 
 [SYSTEM_STATUS_TABLE + 1] = 0;
 [PROCESS_TABLE+4] =  RUNNING;
 
-[70*512]  = [69*512 +1];
+[35840]  = [35329];
 
 PTBR = PAGE_TABLE_BASE + 300;
 PTLR = 10;
 
 
-[PTBR] = -1;
-[PTBR + 1] = "0000";
-[PTBR + 2] = -1;
-[PTBR + 3] = "0000";
-[PTBR + 4] = -1;
-[PTBR + 5] = "0000";
-[PTBR + 6] = -1;
-[PTBR + 7] = "0000";
-[PTBR + 8] = 69;
-[PTBR + 9] = "0100";
-[PTBR + 10] = -1;
-[PTBR + 11] = "0000";
-[PTBR + 12] = -1;
-[PTBR + 13] = "0000";
-[PTBR + 14] = -1;
-[PTBR + 15] = "0000";
-[PTBR + 16] = 81;
-[PTBR + 17] = "0110";
-[PTBR + 18] = -1;
-[PTBR + 19] = "0000";
-
-[PROCESS_TABLE+241] =  15;
 [PROCESS_TABLE + 244] = CREATED;
 [PROCESS_TABLE+251] =  82;
-[PROCESS_TABLE+252] =  0;
 [PROCESS_TABLE+253] =  4096;
-[PROCESS_TABLE+254] =  PTBR;
-[PROCESS_TABLE+255] =  PTLR;
-[81*512] = [69*512 + 1];
+[41472] = [35329]; //81*512 = 69*512 + 1
 
-PTBR = PAGE_TABLE_BASE + 280;
-
-[PTBR] = -1;
-[PTBR + 1] = "0000";
-[PTBR + 2] = -1;
-[PTBR + 3] = "0000";
-[PTBR + 4] = -1;
-[PTBR + 5] = "0000";
-[PTBR + 6] = -1;
-[PTBR + 7] = "0000";
-[PTBR + 8] = 69;
-[PTBR + 9] = "0100";
-[PTBR + 10] = -1;
-[PTBR + 11] = "0000";
-[PTBR + 12] = -1;
-[PTBR + 13] = "0000";
-[PTBR + 14] = -1;
-[PTBR + 15] = "0000";
-[PTBR + 16] = 83;
-[PTBR + 17] = "0110";
-[PTBR + 18] = -1;
-[PTBR + 19] = "0000";
-
-
-[PROCESS_TABLE+ 225] =  0;
 [PROCESS_TABLE+ 235] =  84;
-[PROCESS_TABLE+ 236] =  0;
-[PROCESS_TABLE+237] =  8*512;
-[PROCESS_TABLE+ 238] =  PTBR;
-[PROCESS_TABLE+ 239] =  PTLR;
+[PROCESS_TABLE+237] =  4096;
 
-[SYSTEM_STATUS_TABLE + 1] = 0;
 [PROCESS_TABLE + 228] =  RUNNING;
 
-[83*512]  = [69*512 +1];
+[42496]  = [35329]; // 83*512  = 69*512 + 1
 
 PTBR = PAGE_TABLE_BASE;
 PTLR = 10;
-SP = 8*512;
+SP = 4096;
 
 start;
 ireturn;
