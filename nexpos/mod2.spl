@@ -67,7 +67,6 @@ endif;
 
 // Get Code Page :
 if(fnNumber == 5) then
-        breakpoint;
 	alias blockNum R2; 
 	alias i R3;
 	alias j R4;

@@ -46,23 +46,26 @@ else
   alias minp R6;
   alias idl R7;
   alias excl R8;
+  alias exclidl R9;
   if(CORE == PRIMARY_CORE) then
     maxp = 14;
     minp = 1;
     idl = 0;
     excl = [SYSTEM_STATUS_TABLE + 6];
+    exclidl = 14;
   else
     maxp = 15;
     minp = 3;
     idl = 14;
     excl = [SYSTEM_STATUS_TABLE + 1];
+    exclidl = 0;
   endif;
 
   newPID = idl;
   i=currentPID + 1;
   while(i<maxp) do
     state = [PROCESS_TABLE + i*16 + 4];
-    if((state == READY || state == CREATED) && ([PROCESS_TABLE +  i*16 + 6] != 1) &&(i != excl)) then
+    if((state == READY || state == CREATED) && ([PROCESS_TABLE +  i*16 + 6] != 1) &&(i != excl) && (i!=exclidl)) then
       newPID = [PROCESS_TABLE + i*16 + 1];
       break;
     endif;
@@ -73,7 +76,7 @@ if(newPID == idl) then
   i=minp;
   while(i<=currentPID) do
     state = [PROCESS_TABLE + i*16 + 4];
-        if((state == READY || state == CREATED) && [PROCESS_TABLE + i * 16 + 6] != 1 && i!= excl) then
+        if((state == READY || state == CREATED) && [PROCESS_TABLE + i * 16 + 6] != 1 && i!= excl && i!=exclidl) then
                 newPID = [PROCESS_TABLE + i*16 + 1];
                 break;
         endif;
@@ -101,7 +104,6 @@ PTBR = [process_table_entry + 14];
 PTLR = [process_table_entry + 15];
 [SYSTEM_STATUS_TABLE + 5*CORE + 1] = newPID;
 if(state == CREATED) then
-	breakpoint;
 	BP = [[process_table_entry+11]*512]; 
 	[process_table_entry + 4] = RUNNING;
 	[process_table_entry + 9] = 0;

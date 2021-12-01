@@ -1,0 +1,177 @@
+// Fork System call - INT 8
+
+// Set MODE FLAG in PROCESS_TABLE + 8
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 9] = 8;
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1]*16 + 11]*512 -1;
+
+R1 = 1;
+call MOD_1;
+
+alias childPID R0;
+alias currPID R1;
+alias page_table R2;
+alias userSP R3;
+alias proc_table R8;
+alias child_pr_table R9;
+
+currPID = [SYSTEM_STATUS_TABLE + 1];
+page_table = [PROCESS_TABLE + currPID*16 + 14];
+userSP = [PROCESS_TABLE + currPID*16 + 13];
+proc_table = PROCESS_TABLE + currPID*16;
+child_pr_table = PROCESS_TABLE + childPID*16;
+if(childPID == -1) then
+  [[page_table + 2*(userSP-1)/512] *512 + ((userSP-1)%512)] = -1;
+  [PROCESS_TABLE + currPID*16 + 9] = 0;
+  SP = userSP;
+  ireturn;
+endif;
+
+if([page_table+4] == -1) then
+  multipush(R0, R1, R2, R3, R8, R9);
+  R1 = 1;
+  call MOD_2;
+  R4 = R0;
+  multipop(R0, R1, R2, R3, R8, R9);
+  [page_table+4] = R4;
+  [page_table+5] = "0110";
+  multipush(R0, R1, R2, R3, R8, R9);
+  R1 = 1;
+  call MOD_2;
+  R4 = R0;
+  multipop(R0, R1, R2, R3, R8, R9);
+  [page_table+6] = R4;
+  [page_table+7] = "0110";
+endif;
+
+
+alias stk_mem1 R6;
+alias stk_mem2 R7;
+
+multipush(R0, R1, R2, R3, R8, R9);
+R1 = 1;
+call MOD_2;
+R4 = R0;
+multipush(R4);
+R1 = 1;
+call MOD_2;
+R6 = R0;
+multipush(R6);
+R1 = 1;
+call MOD_2;
+R7 = R0;
+multipop(R0, R1, R2, R3, R8, R9, R4, R6);
+
+
+[child_pr_table + 3] = [proc_table + 3];
+[child_pr_table + 6] = [proc_table + 6];
+[child_pr_table + 10] = [proc_table + 10];
+[child_pr_table + 7] = [proc_table + 7];
+[child_pr_table + 13] = [proc_table + 13];
+[child_pr_table + 9] = 0;
+[child_pr_table + 12] = 0;
+[child_pr_table + 0] = 0;
+[child_pr_table + 2] = currPID;
+[child_pr_table + 4] = CREATED;
+
+[child_pr_table + 11] = R4;
+
+alias i R4;
+i=0;
+alias child_resTab R5;
+alias par_resTab R10;
+
+child_resTab = ([child_pr_table + 11]+1) * 512 - 16;
+par_resTab = ([proc_table + 11]+1) * 512 - 16;
+
+while(i<16) do
+  if([par_resTab+i] == 1) then
+    [SEMAPHORE_TABLE + 4*([par_resTab + i + 1]) + 1] = [SEMAPHORE_TABLE + 4*([par_resTab + i + 1]) + 1] + 1;
+  endif;
+  [child_resTab + i]  = [par_resTab + i];
+i = i + 1;
+endwhile;
+
+i=0;
+while(i<10) do
+  [DISK_MAP_TABLE + childPID*10 + i] = [DISK_MAP_TABLE + currPID*10 + i];
+  i = i + 1;
+endwhile;
+
+alias child_page_table R5;
+
+child_page_table = [child_pr_table + 14];
+i=0;
+breakpoint;
+while(i<16) do
+ [child_page_table + i] = [page_table + i];
+ if(i%2 == 0) then
+   if([page_table + i] != -1) then
+     [MEMORY_FREE_LIST + [page_table + i]] = [MEMORY_FREE_LIST + [page_table + i]] + 1;
+   endif;
+ endif;
+i = i + 1;
+endwhile;
+
+// library 1
+//[child_page_table] = [page_table];
+//[MEMORY_FREE_LIST + [page_table]] = [MEMORY_FREE_LIST + [page_table]] + 1;
+//[child_page_table + 1] = [page_table + 1];
+//library 2
+//[child_page_table + 2] = [page_table + 2];
+//[MEMORY_FREE_LIST + [page_table + 2]] = [MEMORY_FREE_LIST + [page_table + 2]] + 1;
+//[child_page_table + 3] = [page_table + 3];
+//heap 1
+//[child_page_table + 4] = [page_table + 4];
+//[MEMORY_FREE_LIST + [page_table + 4]] = [MEMORY_FREE_LIST + [page_table + 4]] + 1;
+//[child_page_table + 5] = [page_table + 5];
+//heap 2
+//[child_page_table + 6] = [page_table + 6];
+//[MEMORY_FREE_LIST + [page_table + 6]] = [MEMORY_FREE_LIST + [page_table + 6]] + 1;
+//[child_page_table + 7] = [page_table + 7];
+//code 1
+//[child_page_table + 8] = [page_table + 8];
+//if([page_table + 8] != -1) then
+//[MEMORY_FREE_LIST + [page_table + 8]] = [MEMORY_FREE_LIST + [page_table + 8]] + 1;
+//endif;
+//[child_page_table + 9] = [page_table + 9];
+//code 2
+//[child_page_table + 10] = [page_table + 10];
+//if([page_table+10] != -1) then
+//[MEMORY_FREE_LIST + [page_table + 10]] = [MEMORY_FREE_LIST + [page_table + 10]] + 1;
+//endif;
+//[child_page_table + 11] = [page_table + 11];
+//code 3
+//[child_page_table + 12] = [page_table + 12];
+//if([page_table + 12] != -1) then
+//[MEMORY_FREE_LIST + [page_table + 12]] = [MEMORY_FREE_LIST + [page_table + 12]] + 1;
+//endif;
+//[child_page_table + 13] = [page_table + 13];
+//code 4
+//[child_page_table + 14] = [page_table + 14];
+//if(page_table + 14 != -1) then
+//[MEMORY_FREE_LIST + [page_table + 4]] = [MEMORY_FREE_LIST + [page_table + 14]] + 1;
+//endif;
+//[child_page_table + 15] = [page_table + 15];
+
+[child_page_table + 16] = stk_mem1;
+[child_page_table + 17] = [page_table + 17];
+
+[child_page_table + 18] = stk_mem2;
+[child_page_table + 19] = [page_table + 19];
+
+i=0;
+while(i<512) do
+  [[child_page_table + 16]*512 + i] = [[page_table + 16]*512 + i];
+  [[child_page_table + 18]*512 + i] = [[page_table + 18]*512 + i];
+i=i+1;
+endwhile;
+
+[[child_pr_table + 11]*512 ] = BP;
+
+[[page_table + 2*(userSP-1)/512] *512 + ((userSP-1)%512)] = childPID;
+[[child_page_table + 2*(userSP-1)/512] *512 + ((userSP-1)%512)] = 0;
+[proc_table + 9] = 0;
+SP = userSP;
+ireturn;

@@ -8,18 +8,20 @@ backup;
 
 
 
-R1 = ACQUIRE_KERN_LOCK;
-call ACCESS_CONTROL;
-
 alias userSP R1; 
 userSP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 13];
 alias currentPID R2;
 currentPID = [SYSTEM_STATUS_TABLE + 5*CORE +1];
 multipush(EIP);
 
+multipush(R1, R2, EC, EIP, EPN);
+R1 = ACQUIRE_KERN_LOCK;
+call ACCESS_CONTROL;
+multipop(R1, R2, EC, EIP, EPN);
+
 if((EC != 0) || (userSP == (PTLR*512) -1)) then
 	print "Fatal exc";
-        print R1;
+        print R2;
 	print EC;
 	print EMA;
 	print EIP;
@@ -37,7 +39,6 @@ if((EC != 0) || (userSP == (PTLR*512) -1)) then
 endif;
 alias blockNum R3;
 if((EPN >3)&& (EPN < 8)) then // code page
- 	breakpoint;
 	blockNum = [DISK_MAP_TABLE + currentPID*10 + EPN];
 	multipush(R1, R2, R3, EPN);
 	R1 = 5;

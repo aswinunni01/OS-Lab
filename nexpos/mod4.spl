@@ -16,7 +16,6 @@ if(functionNum == 1) then
 	[DISK_STATUS_TABLE + 3] = blockNumber;
 	store(pageNumber, blockNumber);
 	[PROCESS_TABLE + currentPID*16 + 4] = WAIT_DISK;
-
 	R1 = RELEASE_LOCK;
 	R2 = KERN_LOCK;
 	call ACCESS_CONTROL;

@@ -1,6 +1,5 @@
 // Logout - 28
 // Arguments - NIL
-breakpoint;
 
 
 alias userSP R1;
@@ -23,7 +22,6 @@ multipush(R1, R2, R3);
 call MOD_5;
 multipop(R1, R2, R3);
 
-breakpoint;
 multipush(R1, R2, R3);
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;

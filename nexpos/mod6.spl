@@ -3,15 +3,16 @@
 alias fnNum R1;
 alias pid R2;
 
+
 if(R1 == SWAP_OUT) then
   alias i R3;
-  i = 3;
   alias procTab R4;
   alias reqpid R5;
   alias condn R6;
   condn = WAIT_PROCESS;
 
 findproc:
+  i = 3;
   while(i< MAX_PROC_NUM - 2) do
     procTab = PROCESS_TABLE + 16*i;
     if([procTab + 4] == condn && [procTab + 6]!=1) then
@@ -51,22 +52,21 @@ findproc:
    alias pt R7;
    pt = [procTab + 14];
    i = 2;
-   while(i< (MAX_PROC_PAGES - 2)) do
-     if(i>3 && i<8) then
+   while(i< (MAX_PROC_PAGES)) do
      if([pt + 2*i] != -1) then
+     if(i>3 && i<8) then
      
      multipush(R1, R2, R3, R4, R5, R6, R7);
      R1 = RELEASE_PAGE;
      R2 = [pt + 2*i];
      call MEMORY_MANAGER;
      multipop(R1, R2, R3, R4, R5, R6, R7);
-     endif;
      [pt + 2*i] = -1;
      [pt + 2*i + 1] = "0000";
      endif;
 
      if((i>1 && i<4) || (i>7 && i<10)) then
-     if([pt + 2*i] != -1 && [MEMORY_FREE_LIST + [pt + 2*i]] <2) then	
+     if([MEMORY_FREE_LIST + [pt + 2*i]] <2) then	
        call getswpblk;
        [DISK_MAP_TABLE + 10*reqpid + i] = R0;
        multipush(R1, R2, R3, R4, R5, R6, R7);
@@ -85,6 +85,7 @@ findproc:
        [pt + 2*i + 1] = "0000";
      endif;
      endif;
+     endif;
   i = i + 1;
   endwhile; 
 
@@ -96,6 +97,10 @@ endif;
 
 
 if(fnNum == SWAP_IN) then
+  if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
+    [SYSTEM_STATUS_TABLE + 5] = 0;
+    return;
+  endif;
   alias i R3;
   i = 0;
   alias procTab R4;
@@ -106,6 +111,7 @@ if(fnNum == SWAP_IN) then
   while(i< (MAX_PROC_NUM - 2)) do
      procTab = PROCESS_TABLE + 16*i;
      if([procTab] > maxtick && [procTab + 4] == READY && [procTab + 6] == 1) then
+	maxtick = [procTab];
        reqpid = i;
        break;
      endif;
@@ -124,8 +130,8 @@ if(fnNum == SWAP_IN) then
   i = 2;
 
   while(i<MAX_PROC_PAGES) do
-    if(i>1 && i<4) then
       if([DISK_MAP_TABLE + 10*reqpid + i] != -1) then
+    if(i>1 && i<4) then
         call getFreepage;
 
 	[pt + 2*i] = R0;
@@ -134,7 +140,6 @@ if(fnNum == SWAP_IN) then
 	call relblock;
 	[DISK_MAP_TABLE + 10*reqpid + i] = -1;
 
-      endif; 
 
     endif;
     if(i > 7 && i <10) then
@@ -145,6 +150,7 @@ if(fnNum == SWAP_IN) then
       call relblock;
       [DISK_MAP_TABLE + 10*reqpid + i] = -1;
     endif;
+      endif; 
 
   i = i + 1;
   endwhile;

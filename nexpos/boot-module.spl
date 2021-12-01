@@ -230,7 +230,7 @@ endwhile;
 //[DISK_MAP_TABLE + 10*1 + 9] = -1;
 
 // Set USERID for INIT
-[PROCESS_TABLE + 19] = 1;
+[PROCESS_TABLE + 19] = 0;
 
 
 // Shell process PID 2
@@ -266,7 +266,7 @@ PTLR = 10;
 [PROCESS_TABLE + 46] = PTBR;
 [PROCESS_TABLE + 47] = PTLR;
 [PROCESS_TABLE + 34] = 1;
-i = 78;
+i = 77;
 while(i<85) do
 [MEMORY_FREE_LIST + i] = 1;
 i = i + 1;

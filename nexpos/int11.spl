@@ -5,7 +5,6 @@ alias procTab R4;
 currPID = [SYSTEM_STATUS_TABLE + 5*CORE + 1];
 procTab = PROCESS_TABLE + currPID*16;
 userSP = SP;
-breakpoint;
 [procTab + 13] = SP;
 SP = [procTab + 11]*512 -1;
 

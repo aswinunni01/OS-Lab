@@ -4,6 +4,7 @@ alias fnNum R1;
 
 if(fnNum == ACQUIRE_KERN_LOCK) then
   if(CORE == SECONDARY_CORE) then
+    breakpoint;
     if([SYSTEM_STATUS_TABLE + 5] != 0 || [SYSTEM_STATUS_TABLE + 7] != 0) then
        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 6]*16 + 4] = READY;
        call SCHEDULER;
@@ -13,6 +14,7 @@ if(fnNum == ACQUIRE_KERN_LOCK) then
   while(tsl(KERN_LOCK) == 1) do
     continue;
   endwhile;
+
   return;
 
 endif; 

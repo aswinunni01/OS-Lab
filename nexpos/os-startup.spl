@@ -54,7 +54,9 @@ PTLR = 10;
 [PTBR+19] = "0000";
 
 
+[procTab] = 0;
 [procTab + 1] =  i;
+[procTab + 3] = 0;
 [procTab + 12] = 0;
 [procTab + 13] =  4096;
 [procTab + 14] =  PTBR;
@@ -83,7 +85,7 @@ endwhile;
 [SYSTEM_STATUS_TABLE + 1] = 0;
 [PROCESS_TABLE+4] =  RUNNING;
 
-[35840]  = [35329];
+[35840]  = [35329];	// IDLE process pg 70
 
 PTBR = PAGE_TABLE_BASE + 300;
 PTLR = 10;
@@ -92,14 +94,15 @@ PTLR = 10;
 [PROCESS_TABLE + 244] = CREATED;
 [PROCESS_TABLE+251] =  82;
 [PROCESS_TABLE+253] =  4096;
-[41472] = [35329]; //81*512 = 69*512 + 1
+[41472] = [35329]; //81*512 = 69*512 + 1 - Swapper
+
 
 [PROCESS_TABLE+ 235] =  84;
 [PROCESS_TABLE+237] =  4096;
 
 [PROCESS_TABLE + 228] =  RUNNING;
 
-[42496]  = [35329]; // 83*512  = 69*512 + 1
+[42496]  = [35329]; // 83*512  = 69*512 + 1  - IDLE2 Process
 
 PTBR = PAGE_TABLE_BASE;
 PTLR = 10;
