@@ -78,7 +78,6 @@ if(fnNum == OPEN) then
 endif;
 
 if(fnNum == CLOSE) then
-  breakpoint;
   alias openFileIndex R2;
   alias inodeIndex R3;
   alias openFileTab R4;

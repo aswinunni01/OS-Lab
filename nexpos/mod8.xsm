@@ -39,7 +39,6 @@ JZ R16, _L8
 JMP _L7
 JMP _L7
 _L8:
-BRKP
 RET
 JMP _L2
 _L1:

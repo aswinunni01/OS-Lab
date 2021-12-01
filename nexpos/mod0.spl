@@ -189,7 +189,6 @@ if(functionNum == 8) then
 	
 	[TERMINAL_STATUS_TABLE + 0] = 1;
 	[TERMINAL_STATUS_TABLE + 1] = currentPID;
-	breakpoint;
 	return;
 endif;
 
@@ -216,7 +215,6 @@ if(functionNum == 9) then
 		endwhile;
 		alias retVal R0;
 		retVal = 0;
-		breakpoint;
 		return;
 	endif;
 else

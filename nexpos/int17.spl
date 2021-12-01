@@ -15,6 +15,7 @@ SP = [procTab + 11]*512 - 1;
 
 [procTab + 9] = 27;
 
+
 multipush(R1, R2, R3);
 R1 = ACQUIRE_KERN_LOCK;
 R2 = RELEASE_LOCK;
@@ -92,6 +93,6 @@ retLabel:
   multipop(R1, R2, R3);
 
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)] = R11;
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   SP = userSP;
   ireturn;

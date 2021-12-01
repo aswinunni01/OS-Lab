@@ -10,8 +10,8 @@ process_table = PROCESS_TABLE + currentPID*16;
 [process_table + 13] = userSP;
 SP = [process_table + 11]*512 - 1;
 
-breakpoint;
 [process_table + 9] = 9;
+
 
 multipush(R1, R2, R3);
 R1 = ACQUIRE_KERN_LOCK;
@@ -49,7 +49,7 @@ if(flag == 0) then
 	call ACCESS_CONTROL;
 	multipop(R1, R2, R3, R4, R5);
 
-//	[process_table + 9] = 0;
+	[process_table + 9] = 0;
 	SP = userSP;
 	ireturn;
 endif;
@@ -143,7 +143,6 @@ else
 if(i==8 || i==9) then // Stack
 	[DISK_MAP_TABLE + currentPID*10 + i] = -1;
 else
-breakpoint;
 if((i-4)<nBlocks) then // Code
 	[DISK_MAP_TABLE + currentPID*10  + i] = [INODE_TABLE + inodeEntry*16 + 8 + (i-4)];
 
@@ -162,7 +161,6 @@ endwhile;
 //	R1 = 2;
 //	R3 = [PTBR+8+2*i];
 //	R4 = [INODE_TABLE + inodeEntry*16 + 8 + i];
-//	breakpoint;
 //	call MOD_4;
 //	multipop(R0, R1, R2, R3, R4, R5);	
 //i = i + 1;
@@ -181,5 +179,5 @@ endwhile;
   multipop(R0, R1, R2, R3);
 
 SP = 8*512;
-//[process_table + 9] = 0;
+[process_table + 9] = 0;
 ireturn;

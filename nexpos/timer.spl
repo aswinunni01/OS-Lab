@@ -79,7 +79,6 @@ while(i<MAX_PROC_NUM) do
 [PROCESS_TABLE + 16*i] = [PROCESS_TABLE + 16*i] + 1;
 i = i + 1;
 endwhile;
-breakpoint;
 call MOD_5;
 
 restore;

@@ -89,7 +89,6 @@ findproc:
   endwhile; 
 
   [procTab + 6] = 1;
-  breakpoint;
   [SYSTEM_STATUS_TABLE + 4] = [SYSTEM_STATUS_TABLE + 4] + 1;
   [SYSTEM_STATUS_TABLE + 5] = 0;
   return;

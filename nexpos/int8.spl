@@ -1,10 +1,11 @@
 // Fork System call - INT 8
-
+breakpoint;
 // Set MODE FLAG in PROCESS_TABLE + 8
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE +5*CORE + 1]*16 + 9] = 8;
 
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 13] = SP;
 SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 11]*512 -1;
+
 
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
@@ -35,7 +36,7 @@ if(childPID == -1) then
   multipop(R0, R1, R2, R3);
 
   [[page_table + 2*(userSP-1)/512] *512 + ((userSP-1)%512)] = -1;
-//  [PROCESS_TABLE + currPID*16 + 9] = 0;
+  [PROCESS_TABLE + currPID*16 + 9] = 0;
   SP = userSP;
   ireturn;
 endif;
@@ -128,7 +129,6 @@ alias child_page_table R5;
 
 child_page_table = [child_pr_table + 14];
 i=0;
-breakpoint;
 while(i<16) do
  [child_page_table + i] = [page_table + i];
  if(i%2 == 0) then
@@ -208,7 +208,6 @@ endwhile;
   call ACCESS_CONTROL;
   multipop(R0, R1, R2, R3);
 
-//[proc_table + 9] = 0;
+[proc_table + 9] = 0;
 SP = userSP;
-breakpoint;
 ireturn;

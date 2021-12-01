@@ -6,7 +6,6 @@ alias fnNumber R1;
 if(fnNumber == 1) then
 
 	[SYSTEM_STATUS_TABLE + 3] = [SYSTEM_STATUS_TABLE + 3] + 1;
-        breakpoint;	
 	while([SYSTEM_STATUS_TABLE + 2] == 0) do 
 		[PROCESS_TABLE + 16*[SYSTEM_STATUS_TABLE + CORE*5 + 1] + 4] = WAIT_MEM;
 		multipush(R1);
@@ -68,6 +67,7 @@ endif;
 
 // Get Code Page :
 if(fnNumber == 5) then
+        breakpoint;
 	alias blockNum R2; 
 	alias i R3;
 	alias j R4;

@@ -154,7 +154,6 @@ if(syscall == 6) then
   R11 = userSP - 3;
   call stkval;
   offset = R11;
-  breakpoint;
   if(lseek + offset < 0) then
 
     multipush(R1, R2, R3);
@@ -207,6 +206,6 @@ retLabel:
   multipop(R1, R2, R3);
 
   SP = userSP;
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
   ireturn;

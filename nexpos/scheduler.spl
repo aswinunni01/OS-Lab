@@ -2,9 +2,6 @@
 R1 = ACQUIRE_SCHED_LOCK;
 call ACCESS_CONTROL;
 
-
-
-
 alias currentPID R0;
 alias process_table_entry R1;
 
@@ -27,6 +24,13 @@ if(CORE == SECONDARY_CORE && ([SYSTEM_STATUS_TABLE + 5] != 0 || [SYSTEM_STATUS_T
   state = [PROCESS_TABLE + 14*16 + 4];
   goto switch;
 endif;
+
+if( CORE == PRIMARY_CORE && [SYSTEM_STATUS_TABLE + 7] != 0 && [SYSTEM_STATUS_TABLE + 6] != IDLE2_PROCESS) then
+  newPID = 0;
+  state = [PROCESS_TABLE + 4];
+  goto switch;
+endif;
+
 
 if( CORE == PRIMARY_CORE && [SYSTEM_STATUS_TABLE + 5] != 0 ) then
   if([PROCESS_TABLE + 244] == WAIT_DISK) then
@@ -55,11 +59,11 @@ else
   endif;
 
   newPID = idl;
-  i=minp;
-  while(i<maxp-currentPID) do
-    state = [process_table_entry + i*16 + 4];
-    if((state == READY || state == CREATED) && ([process_table_entry +  i*16 + 6] != 1) &&(i != excl)) then
-      newPID = [process_table_entry + i*16 + 1];
+  i=currentPID + 1;
+  while(i<maxp) do
+    state = [PROCESS_TABLE + i*16 + 4];
+    if((state == READY || state == CREATED) && ([PROCESS_TABLE +  i*16 + 6] != 1) &&(i != excl)) then
+      newPID = [PROCESS_TABLE + i*16 + 1];
       break;
     endif;
   i = i + 1;
@@ -67,7 +71,7 @@ else
 
 if(newPID == idl) then
   i=minp;
-  while(i<currentPID) do
+  while(i<=currentPID) do
     state = [PROCESS_TABLE + i*16 + 4];
         if((state == READY || state == CREATED) && [PROCESS_TABLE + i * 16 + 6] != 1 && i!= excl) then
                 newPID = [PROCESS_TABLE + i*16 + 1];
@@ -97,15 +101,15 @@ PTBR = [process_table_entry + 14];
 PTLR = [process_table_entry + 15];
 [SYSTEM_STATUS_TABLE + 5*CORE + 1] = newPID;
 if(state == CREATED) then
-
+	breakpoint;
+	BP = [[process_table_entry+11]*512]; 
+	[process_table_entry + 4] = RUNNING;
+	[process_table_entry + 9] = 0;
 	multipush(R1);
 	R1 = RELEASE_LOCK;
 	R2 = SCHED_LOCK;
 	call ACCESS_CONTROL;
 	multipop(R1);
-	BP = [[process_table_entry+11]*512]; 
-	[process_table_entry + 4] = RUNNING;
-	[process_table_entry + 9] = 0;
 	SP = [process_table_entry + 13];
 	ireturn;
 endif;

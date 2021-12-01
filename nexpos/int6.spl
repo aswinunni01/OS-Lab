@@ -12,6 +12,7 @@ process_table = PROCESS_TABLE + currentPID*16;
 [process_table+ 13] = userSP;
 SP = [process_table + 11]*512 -1;
 
+
 multipush(R1, R2, R3);
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
@@ -22,7 +23,6 @@ alias page_table R4;
 page_table = PAGE_TABLE_BASE + 20*currentPID;
 alias fileDesc R5;
 R11 = userSP-4;
-breakpoint;
 call stkval;
 fileDesc = R11;
 
@@ -77,7 +77,6 @@ else
 	
 	if(inodeIndex == INODE_ROOT) then
 	  if(lseek == 480) then
- 	    breakpoint;
 	    call relInode;
 	    R11 = -2;
 	    goto retLabel;
@@ -103,7 +102,6 @@ else
 	  multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R12);
 	  [OPEN_FILE_TABLE+ 4*openFileIndex + 2] = lseek + 1;
 	endif;	
-        breakpoint;	
 	call relInode;
 	R11 = 0;
 	goto retLabel;
@@ -136,7 +134,7 @@ retLabel:
 
 
   [[page_table + 2*(userSP-1)/512]*512 + (userSP-1)%512] =  R11;
-//  [process_table + 9] = 0;
+  [process_table + 9] = 0;
   SP = userSP;
   ireturn;
 

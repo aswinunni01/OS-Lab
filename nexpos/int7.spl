@@ -15,6 +15,7 @@ procTab = PROCESS_TABLE + 16*currPID;
 //Set SP to start of kernel stack (User area)
 SP = [procTab+11]*512 - 1;
 
+
 multipush(R1, R2, R3);
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
@@ -79,7 +80,6 @@ if(fileDesc!=-2) then
 	endif;
 	
 	if(lseek%512 == 0 && lseek == [INODE_TABLE + 16*inodeIndex + 2]) then
-	  breakpoint;
 	  multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9);
 	  R1 = GET_FREE_BLOCK;
 	  call MEMORY_MANAGER;

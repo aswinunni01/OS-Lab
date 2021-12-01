@@ -6,22 +6,24 @@ SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 11]*512 - 1;
 
 backup;
 
+
+
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
 
 alias userSP R1; 
 userSP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 5*CORE +1]*16 + 13];
-alias currentPID R0;
+alias currentPID R2;
 currentPID = [SYSTEM_STATUS_TABLE + 5*CORE +1];
 multipush(EIP);
 
 if((EC != 0) || (userSP == (PTLR*512) -1)) then
 	print "Fatal exc";
-        print R0;
+        print R1;
 	print EC;
 	print EMA;
 	print EIP;
-	multipush(R0, R1);
+	multipush(R1, R2);
 	R1 = 3;
 	R2 = currentPID;
 	call MOD_1;
@@ -31,38 +33,39 @@ if((EC != 0) || (userSP == (PTLR*512) -1)) then
 	call MOD_5;
 	R1 = ACQUIRE_KERN_LOCK;
 	call ACCESS_CONTROL;
-	multipop(R0, R1);
+	multipop(R1, R2);
 endif;
-alias blockNum R2;
+alias blockNum R3;
 if((EPN >3)&& (EPN < 8)) then // code page
-	blockNum = [DISK_MAP_TABLE + currentPID*10 + 4 + EPN - 4];
-	multipush(R0, R1, R2);
+ 	breakpoint;
+	blockNum = [DISK_MAP_TABLE + currentPID*10 + EPN];
+	multipush(R1, R2, R3, EPN);
 	R1 = 5;
 	R2 = blockNum;
 	call MOD_2;
+	multipop(R1, R2, R3, EPN);
 	[PTBR + 2*EPN] = R0;
 	[PTBR + 2*EPN + 1] = "1100";
-	multipop(R0, R1, R2);
 endif;
 
 if(EPN >1 && EPN < 4) then
-	multipush(R0, R1, R2);
+	multipush(R1, R2, R3);
 	R1 = 1;
 	call MOD_2;
-	[PTBR + 2*2] = R0;
-	[PTBR + 2*2 + 1] = "1110";
+	[PTBR + 4] = R0;
+	[PTBR + 4 + 1] = "1110";
 	R1 = 1;
         call MOD_2;
-        [PTBR + 2*3] = R0;
-        [PTBR + 2*3 + 1] = "1110";
-	multipop(R0, R1, R2);
+        [PTBR + 6] = R0;
+        [PTBR + 6 + 1] = "1110";
+	multipop(R1, R2, R3);
 endif;
 
-multipush(R0);
+multipush(R2);
 R1 = RELEASE_LOCK;
 R2 = KERN_LOCK;
 call ACCESS_CONTROL;
-multipop(R0);
+multipop(R2);
 
 [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 multipop(EIP);

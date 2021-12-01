@@ -1,5 +1,4 @@
 // Shutdown system call - 21
-breakpoint;
 alias userSP R1;
 userSP = SP;
 
@@ -12,6 +11,7 @@ procTab = PROCESS_TABLE + 16*currPID;
 [procTab + 9] = 21;
 [procTab + 13] = userSP;
 SP = [procTab + 11]*512 -1;
+
 
     multipush(R1, R2, R3);
     R1 = RELEASE_LOCK;
@@ -39,7 +39,6 @@ multipop(R1, R2, R3);
 alias i R4;
 i=0;
 while(i<4) do
-  breakpoint;
   if([BUFFER_TABLE + 4*i + 1] == 1) then
     multipush(R1, R2, R3, R4);
     R1 = DISK_STORE;
@@ -98,6 +97,6 @@ retLabel:
 
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
   SP = [procTab + 13];
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   ireturn;
 

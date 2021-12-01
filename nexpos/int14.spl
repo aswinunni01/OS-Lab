@@ -14,6 +14,7 @@ syscall = [[PTBR + 2*(userSP-5)/512]*512 + (userSP-5)%512];
 [procTab + 13] = SP;
 SP = [procTab + 11]*512 -1;
 
+
 multipush(R1, R2, R3, R4);
 R1 = ACQUIRE_KERN_LOCK;
 call ACCESS_CONTROL;
@@ -23,7 +24,6 @@ if(syscall == 19) then
   alias semid R5;
   alias resTab R6;
   resTab = ([procTab+11])*512 + RESOURCE_TABLE_OFFSET;
-  breakpoint;
   semid = [[PTBR + 2*(userSP-4)/512]*512 + (userSP-4)%512];
   if(semid<0 || semid>7 || [resTab + 2*semid] != SEMAPHORE) then
 
@@ -35,7 +35,7 @@ if(syscall == 19) then
 
     [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = -1;
     SP = userSP;
-//    [procTab + 9] = 0;
+    [procTab + 9] = 0;
     ireturn;
   endif;
   
@@ -45,7 +45,6 @@ if(syscall == 19) then
     [procTab + 4] = WAIT_SEMAPHORE;
     [procTab + 5] = semind;
     multipush(R1, R2, R3, R4, R5, R6, R7);
-    breakpoint;
     R1 = RELEASE_LOCK;
     R2 = KERN_LOCK;
     call ACCESS_CONTROL;
@@ -60,7 +59,7 @@ if(syscall == 19) then
   call ACCESS_CONTROL;
   multipop(R1 ,R2, R3 , R4);
 
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   SP = userSP;
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = 0;
   ireturn;
@@ -82,7 +81,7 @@ if(syscall == 20) then
 
     [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = -1;
     SP = userSP;
-//    [procTab + 9] = 0;
+    [procTab + 9] = 0;
     ireturn;
   endif;
   
@@ -100,7 +99,7 @@ if(syscall == 20) then
 
       [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = -2;
       SP = userSP;
-//      [procTab + 9] = 0;
+      [procTab + 9] = 0;
       ireturn;
     endif;
     [SEMAPHORE_TABLE + 4*semind] = -1;
@@ -124,7 +123,7 @@ if(syscall == 20) then
     call ACCESS_CONTROL;
     multipop(R1, R2, R3, R4);
 
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   SP = userSP; 
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = 0;
   ireturn;

@@ -13,7 +13,6 @@ if(fnNum == ACQUIRE_KERN_LOCK) then
   while(tsl(KERN_LOCK) == 1) do
     continue;
   endwhile;
-  breakpoint;
   return;
 
 endif; 

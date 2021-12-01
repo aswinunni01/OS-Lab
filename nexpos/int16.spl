@@ -1,5 +1,4 @@
 //INT 16 - user Management
- breakpoint;
 alias userSP R1;
 userSP = SP;
 
@@ -11,7 +10,6 @@ procTab = PROCESS_TABLE + currPID*16;
 
 [procTab + 13] = SP;
 SP = [procTab + 11]*512 -1;
-
 alias syscall R4;
 R11 = (userSP -5);
 call stkval;
@@ -143,7 +141,6 @@ if(syscall == 24) then
   R11 = (userSP-3);
   call stkval;
   password = R11;
-  breakpoint;
   alias i R7;
   i = 1;
   while(i<MAX_USER_NUM) do
@@ -230,5 +227,5 @@ retLabel:
 
   [[PTBR + 2*(userSP-1)/512]*512 + (userSP-1)%512] = R11;
   SP = userSP;
-//  [procTab + 9] = 0;
+  [procTab + 9] = 0;
   ireturn;
