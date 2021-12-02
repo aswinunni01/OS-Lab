@@ -100,7 +100,9 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 alias i R3;
 i=0;
 while(i<MAX_PROC_NUM) do
-[PROCESS_TABLE + 16*i] = [PROCESS_TABLE + 16*i] + 1;
+  if([PROCESS_TABLE + 16*i + 4] != TERMINATED) then
+	[PROCESS_TABLE + 16*i] = [PROCESS_TABLE + 16*i] + 1;
+  endif;
 i = i + 1;
 endwhile;
 call MOD_5;
