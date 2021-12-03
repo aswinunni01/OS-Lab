@@ -113,7 +113,6 @@ if(fnNum == SWAP_IN) then
      if([procTab] > maxtick && [procTab + 4] == READY && [procTab + 6] == 1) then
 	maxtick = [procTab];
        reqpid = i;
-       break;
      endif;
   i = i + 1;
   endwhile;

@@ -3,6 +3,7 @@
 alias fnNum R1;
 
 if(fnNum == ACQUIRE_KERN_LOCK) then
+  begin:
   if(CORE == SECONDARY_CORE) then
     breakpoint;
     if([SYSTEM_STATUS_TABLE + 5] != 0 || [SYSTEM_STATUS_TABLE + 7] != 0) then
@@ -14,6 +15,15 @@ if(fnNum == ACQUIRE_KERN_LOCK) then
   while(tsl(KERN_LOCK) == 1) do
     continue;
   endwhile;
+
+  if(CORE == SECONDARY_CORE) then
+    if([SYSTEM_STATUS_TABLE + 5] != 0 || [SYSTEM_STATUS_TABLE + 7] != 0) then
+      R1 = RELEASE_LOCK;
+      R2 = KERN_LOCK;
+      call ACCESS_CONTROL;
+      goto begin;
+    endif;
+  endif;
 
   return;
 
